@@ -19,6 +19,38 @@ export interface CalculatorData {
 }
 
 /**
+ * Transform module data to flatten weights object
+ * Converts { weights: { exam, td, tp } } to { weight_exam, weight_td, weight_tp }
+ */
+const transformModuleWeights = (module: any) => {
+  return {
+    ...module,
+    weight_exam: module.weights?.exam ?? module.weight_exam ?? 0,
+    weight_td: module.weights?.td ?? module.weight_td ?? 0,
+    weight_tp: module.weights?.tp ?? module.weight_tp ?? 0,
+  };
+};
+
+/**
+ * Transform units with flattened module weights
+ */
+const transformUnitsWeights = (units: any[]) => {
+  return units.map((unit: any) => ({
+    ...unit,
+    modules: Array.isArray(unit.modules)
+      ? unit.modules.map(transformModuleWeights)
+      : [],
+  }));
+};
+
+/**
+ * Transform modules with flattened weights
+ */
+const transformModulesWeights = (modules: any[]) => {
+  return modules.map(transformModuleWeights);
+};
+
+/**
  * Save calculator to local SQLite database
  * Inserts calculator, semesters, modules/units structure
  */
@@ -42,6 +74,10 @@ export const saveCalculatorLocally = async (
     if (!Array.isArray(calculatorData.units)) {
       calculatorData.units = [];
     }
+
+    // Transform weights to flat structure (weights.exam -> weight_exam)
+    const transformedModules = transformModulesWeights(calculatorData.modules);
+    const transformedUnits = transformUnitsWeights(calculatorData.units);
 
     const now = new Date().toISOString();
 
@@ -86,7 +122,7 @@ export const saveCalculatorLocally = async (
 
       // Insert units/modules for this semester
       if (calculatorData.type === 'advanced') {
-        const semesterUnits = calculatorData.units.filter(
+        const semesterUnits = transformedUnits.filter(
           (u: any) => (u.semester ?? 's1') === sem
         );
         
@@ -113,9 +149,9 @@ export const saveCalculatorLocally = async (
                   module.hasTd ? 1 : 0,
                   module.hasTp ? 1 : 0,
                   module.credit || 0,
-                  module.weights?.exam || 0,
-                  module.weights?.td || 0,
-                  module.weights?.tp || 0,
+                  module.weight_exam || 0,
+                  module.weight_td || 0,
+                  module.weight_tp || 0,
                   now,
                   now,
                   0,
@@ -126,7 +162,7 @@ export const saveCalculatorLocally = async (
         }
       } else {
         // Simple mode: insert modules directly
-        const semesterModules = calculatorData.modules.filter(
+        const semesterModules = transformedModules.filter(
           (m: any) => (m.semester ?? 's1') === sem
         );
         
@@ -168,6 +204,17 @@ export const publishCalculator = async (
   deviceId: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
+    // Transform weights to flat structure (weights.exam -> weight_exam)
+    const transformedModules = transformModulesWeights(calculatorData.modules);
+    const transformedUnits = transformUnitsWeights(calculatorData.units);
+
+    // Transform the calculator data for API
+    const transformedData = {
+      ...calculatorData,
+      modules: transformedModules,
+      units: transformedUnits,
+    };
+
     // Get or generate publisher ID
     let publisherId = await AsyncStorage.getItem('publisher-id');
     
@@ -239,19 +286,19 @@ export const publishCalculator = async (
 
     // Prepare the full calculator structure for the API
     const calculatorPayload = {
-      title: calculatorData.title || `${calculatorData.spec} - ${
-        calculatorData.mode === 'single' ? 'Semester 1' : 'Semester 1 & 2'
+      title: transformedData.title || `${transformedData.spec} - ${
+        transformedData.mode === 'single' ? 'Semester 1' : 'Semester 1 & 2'
       }`,
-      description: calculatorData.description || `Calculator for ${calculatorData.univ} - Level: ${calculatorData.lvl}`,
-      type: calculatorData.type,
+      description: transformedData.description || `Calculator for ${transformedData.univ} - Level: ${transformedData.lvl}`,
+      type: transformedData.type,
       device_id: deviceId,
       publisher_id: publisherId,
-      speciality: calculatorData.spec,
-      level: calculatorData.lvl,
-      university_name: calculatorData.univ,
-      semesters: calculatorData.mode === 'dual' ? ['s1', 's2'] : ['s1'],
-      modules: calculatorData.type === 'simple' ? calculatorData.modules : [],
-      units: calculatorData.type === 'advanced' ? calculatorData.units : [],
+      speciality: transformedData.spec,
+      level: transformedData.lvl,
+      university_name: transformedData.univ,
+      semesters: transformedData.mode === 'dual' ? ['s1', 's2'] : ['s1'],
+      modules: transformedData.type === 'simple' ? transformedData.modules : [],
+      units: transformedData.type === 'advanced' ? transformedData.units : [],
     };
 
     console.log('Publishing calculator with publisherId:', publisherId);

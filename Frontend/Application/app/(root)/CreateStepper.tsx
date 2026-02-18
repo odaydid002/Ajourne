@@ -418,7 +418,7 @@ const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, s
         spec,
         modules,
         units,
-      ];
+      };
 
       const result = await publishCalculator(calculatorData, deviceId);
 
