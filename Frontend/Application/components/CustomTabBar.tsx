@@ -2,7 +2,7 @@ import { View, Pressable, Text, Image } from 'react-native'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
 import { useTranslation } from "react-i18next";
 
-import Icons from '@/constants/icons'
+import Icons from '@/components/text/icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CustomTabBar({

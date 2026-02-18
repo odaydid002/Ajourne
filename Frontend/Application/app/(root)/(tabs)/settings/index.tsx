@@ -1,7 +1,7 @@
 import CustomModal from '@/components/containers/CustomModal'
 import SettingOption from '@/components/containers/SettingOption'
 import { ThemedText } from '@/components/text/ThemedText'
-import Icons from '@/constants/icons'
+import Icons from '@/components/text/icons'
 import i18n from '@/i18n'
 import getUserData from '@/services/getUserData'
 import { resetAppData } from '@/services/resetAppData'

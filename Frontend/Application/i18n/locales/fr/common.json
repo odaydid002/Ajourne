@@ -3,6 +3,7 @@
     "addModule": "Ajouter un module",
     "addUnit": "Ajouter une unité",
     "average": "Moyenne",
+    "unitAvg": "Moyenne d'unité",
     "coeff": "Coeff",
     "credit": "Crédit",
     "dette": "Admis avec dettes",
@@ -13,6 +14,7 @@
     "hasTp": "Avec TP",
     "exemple": "e.g.Anglais",
     "moduleName": "Nom du module",
+    "unknown": "Module inconnue",
     "removeModule": "Supprimer le module",
     "success": "Admis",
     "td": "TD",
@@ -65,8 +67,19 @@
     "simple":"Simple",
     "advanced":"Avancée",
     "infoSaved": "Données enregistrées avec succès",
-    "semester1": "Semester 1",
-    "semester2": "Semester 2"
+    "semester1": "Semestre 1",
+    "semester2": "Semestre 2",
+    "ok": "OK",
+    "error": "Erreur",
+    "success": "Succès",
+    "publishing": "Publication en cours...",
+    "saving": "Enregistrement en cours...",
+    "loading": "Chargement...",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "noData": "Aucune donnée disponible",
+    "info": "Informations",
+    "back": "Retour"
   },
   "mode": {
     "single": "Calculatrice pour un seul semestre",
@@ -90,10 +103,31 @@
     "step3": {
       "oneSemester": "Un seul semestre",
       "title": "Combien de semestres ?",
-      "twoSemester": "Annuel (deux semestres)"
+      "twoSemester": "Annuel (deux semestres)",
+      "selectSemester": "Sélectionner le semestre"
     },
     "step4": {
       "example": "ex. Anglais"
+    },
+    "errors": {
+      "step1": "Tous les champs doivent être remplis.",
+      "step2": "Le nombre de semestres doit être choisi",
+      "step3_simple": "Vous devez ajouter au moins un module",
+      "step3_module": "Les modules doivent avoir un nom et un coefficient positif",
+      "step3_advanced": "Il faut ajouter au moins une unité.",
+      "step3_unit": "Chaque unité doit contenir au moins un module",
+      "noPublisher": "Vous devez vous enregistrer en tant qu'éditeur pour publier des calculateurs",
+      "noDevice": "ID de périphérique non trouvé",
+      "publishFailed": "Échec de la publication du calculateur",
+      "publishError": "Une erreur s'est produite lors de la publication",
+      "saveFailed": "Échec de l'enregistrement du calculateur",
+      "saveError": "Une erreur s'est produite lors de l'enregistrement",
+      "notFound": "Calculateur non trouvé",
+      "loadFailed": "Échec du chargement du calculateur"
+    },
+    "success": {
+      "published": "Calculateur publié avec succès !",
+      "savedLocal": "Calculateur enregistré dans la base de données locale !"
     }
   },
   "getStarted": {

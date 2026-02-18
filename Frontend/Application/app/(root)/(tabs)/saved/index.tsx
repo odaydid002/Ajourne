@@ -4,8 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next';
 import { useColorScheme } from 'nativewind';
 import { ThemedText } from '@/components/text/ThemedText';
-import Icons from '@/constants/icons';
-import CalculatorApp from '@/components/containers/CalculatorApp';
+import Icons from '@/components/text/icons';
 import images from '@/constants/images';
 import i18n from '@/i18n';
 
@@ -38,19 +37,19 @@ const Saved = () => {
           <ThemedText className='text-2xl font-Poppins-Medium font-bold'>{t("control.saved")}</ThemedText>
           {colorScheme === "dark" ? <Icons.BookmarkIcon /> : (<Icons.BookmarkDarkIcon />)}
         </View>
-        <ScrollView className='flex-col relative pb-8'
+        <ScrollView className='flex-col relative pb-8 px-2'
           style={{
             maxHeight: height - insets.bottom - insets.top - 100,
             borderWidth: 1,
             borderColor: 'transparent',
           }}
         >
-            <View className="flex-col gap-4 px-2 mt-4 pb-20">
+            <View className="flex-col gap-4 mt-4 pb-20">
               {mostUsed.map((item, index) => (
                 <TouchableOpacity
                   key={item.id}>
                     <View className='flex-row justify-between items-center bg-container dark:bg-container-dark rounded-xl p-4 w-full'
-                        style={{boxShadow: '2px 4px 3px rgba(0, 0, 0, 0.1)'}}
+                        style={{boxShadow: '2px 4px 2px rgba(0, 0, 0, 0.1)'}}
                     >
                         <View className='flex-row gap-4 flex-1 items-center'>
                             <View className='justify-center items-center flex-col rounded overflow-hidden' style={{width: 40, height: 40}}>

@@ -3,7 +3,7 @@ import SelectInput from '@/components/inputs/SelectInput'
 import GirlSit from '@/components/svgs/GirlSit'
 import { ThemedText } from '@/components/text/ThemedText'
 import data from '@/constants/data'
-import icons from '@/constants/icons'
+import icons from '@/components/text/icons'
 import i18n from '@/i18n'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useEffect, useState } from 'react'
@@ -14,7 +14,7 @@ import { ScrollView } from 'react-native'
 
 import { router } from 'expo-router'
 import { useColorScheme } from "nativewind"
-import Icons from '@/constants/icons'
+import Icons from '@/components/text/icons'
 import { useTranslation } from 'react-i18next'
 
 const { width } = Dimensions.get('window')

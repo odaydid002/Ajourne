@@ -1,6 +1,6 @@
 import CalculatorApp from '@/components/containers/CalculatorApp'
 import data from '@/constants/data'
-import Icons from '@/constants/icons'
+import Icons from '@/components/text/icons'
 import { useLocalSearchParams } from 'expo-router'
 import { useColorScheme } from 'nativewind'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -20,7 +20,7 @@ const SearchInput = ({ onClickFilter, selectedFilter, onFilterChange, ...props }
       className='flex-col w-full h-fit pb-4' 
       style={{ boxShadow: "0px 5px 4px rgba(0, 0, 0, 0.1)" }}
     >
-      <View className='flex-row items-center gap-4 p-8 py-0'>
+      <View className='flex-row items-center gap-4 px-4 py-0'>
         <View className='flex-row items-center bg-input dark:bg-input-dark flex-1 rounded-xl' 
           style={{ boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)" }}>
           <View className='mx-4'>
@@ -41,7 +41,11 @@ const SearchInput = ({ onClickFilter, selectedFilter, onFilterChange, ...props }
         </TouchableOpacity>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className='w-full mt-4' contentContainerClassName='flex-row gap-4 px-4 mt-2'>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        showsHorizontalScrollIndicator={false} 
+        className='w-full mt-4' 
+        contentContainerClassName='flex-row gap-4 px-4 mt-2'>
         {data.filterOptions.map((option) => (
           <TouchableOpacity 
             key={option.value}

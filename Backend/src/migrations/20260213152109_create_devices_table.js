@@ -4,7 +4,12 @@
  */
 exports.up = function(knex) {
   return knex.schema.createTable('devices', (table) => {
-    table.uuid('id').primary();
+    table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
+    table.string('name').nullable();
+    table.integer('age').nullable();
+    table.string('speciality').nullable();
+    table.string('level').nullable();
+    table.string('university').nullable();
     table.timestamps(true, true); // created_at & updated_at
   });
 };

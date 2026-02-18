@@ -4,6 +4,11 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- 1. Devices (anonymous users)
 CREATE TABLE devices (
     id UUID PRIMARY KEY,
+    name TEXT,
+    age INTEGER,
+    speciality TEXT,
+    level TEXT,
+    university TEXT,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -29,7 +34,10 @@ CREATE TABLE calculators (
     type calculator_type NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
-    published BOOLEAN DEFAULT FALSE,   -- true = server-public, false = private
+    published BOOLEAN DEFAULT FALSE, 
+    speciality TEXT,
+    level TEXT,
+    university_name TEXT,
     ratings_count INTEGER DEFAULT 0,
     ratings_avg NUMERIC(3,2) DEFAULT 0,
     usage_count INTEGER DEFAULT 0,

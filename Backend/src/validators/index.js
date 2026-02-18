@@ -11,12 +11,11 @@ const validatePublisher = (data) => {
   if (!data.email || !data.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
     errors.email = 'Valid email is required';
   }
-  if (!data.device_id) {
-    errors.device_id = 'device_id is required';
-  }
+  // device_id is optional; publisher can provide device details instead
   if (data.name && data.name.trim().length === 0) {
     errors.name = 'Name cannot be empty';
   }
+  
   return { valid: Object.keys(errors).length === 0, errors };
 };
 

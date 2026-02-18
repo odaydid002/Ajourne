@@ -4,22 +4,27 @@ import { ThemedText } from '@/components/text/ThemedText'
 import data from '@/constants/data'
 import i18n from '@/i18n'
 import { useEffect, useState } from 'react'
-import { Dimensions, I18nManager, Pressable, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import { Dimensions, I18nManager, Pressable, Text, TextInput, TouchableOpacity, useWindowDimensions, View, Alert, ActivityIndicator } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
-
 import { ScrollView } from 'react-native'
 
 import SettingOption from '@/components/containers/SettingOption'
-import Icons from '@/constants/icons'
+import Icons from '@/components/text/icons'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useColorScheme } from "nativewind"
 import { useTranslation } from 'react-i18next'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import CustomModal from '@/components/containers/CustomModal'
 import Module from '@/components/containers/Module'
 import Unit from '@/components/containers/Unit'
 import Images from '@/constants/images'
 import uuid from 'react-native-uuid'
+import CalculatorModule from '@/components/containers/CalculatorModule'
+import CalculatorUnit from '@/components/containers/CalculatorUnit'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { calculatorService } from '@/services/calculatorService'
+import { saveCalculatorLocally, publishCalculator } from '@/services/calculatorTransactions'
 
 const { width } = Dimensions.get('window')
 
@@ -45,12 +50,19 @@ const StepDots = ({ step, total }: stepCount) => (
   </View>
 )
 
-const Step1 = ({setSpec, setUniv, setLvl}: any) => {
+const Step1 = ({setSpec, setUniv, setLvl, error, initialLvl}: any) => {
     const { colorScheme } = useColorScheme();
     const { t, i18n } = useTranslation();
     const [selectedSpec, setSelectedSpec] = useState(i18n.t("getStarted.step3.selectSpecialty"))
     const [selectedUniv, setSelectedUniv] = useState(i18n.t("getStarted.step3.selectUniversity"))
-    const [selectedLvl, setSelectedLvl] = useState("l1")
+    const [selectedLvl, setSelectedLvl] = useState("")
+
+    useEffect(() => {
+      if (initialLvl) {
+        setSelectedLvl(initialLvl)
+        setLvl(initialLvl)
+      }
+    }, [initialLvl])
 
     const univs = data.univs.map((univ) => t(`${univ.shortName === "other"?'control':'universities'}.${univ.shortName.replace(/\s+/g, '')}`))
 
@@ -130,11 +142,12 @@ const Step1 = ({setSpec, setUniv, setLvl}: any) => {
                       placeholderTextColor={ colorScheme === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.5)" }
                     />
                   )}
+                  {error && <ThemedText className='text-xs mt-2' style={{color: '#f01e2c'}}>{error}</ThemedText>}
                 </View>
         </>
     );
 }
-const Step2 = ({setMode}:any) => {
+const Step2 = ({setMode, error}:any) => {
   const { t, i18n } = useTranslation();
   const [selectedMode, setSelectedMode] = useState('');
   const { colorScheme } = useColorScheme();
@@ -158,9 +171,10 @@ const Step2 = ({setMode}:any) => {
             </View>
           </View>
         </SettingOption>
-        <View className='self-center mt-24'>
+        <View className='self-center bottom-0 absolute '>
           <Images.questionSvg />
         </View>
+        {error && <View className='mt-4'><ThemedText className='text-xs' style={{color: '#f01e2c'}}>{error}</ThemedText></View>}
       </>
   )
 }
@@ -201,15 +215,14 @@ type unit = {
   id?: string
 }
 
-const Step3 = ({mode, type}: step3Props) => {
+const Step3 = ({mode, type, modules, setModules, units, setUnits, error}: any) => {
   const { t, i18n } = useTranslation();
   const [selectedSem, setSelectedSem] = useState('s1');
   const { colorScheme } = useColorScheme();
-  const [modules, setModules] = useState<moduleStruct[]>([]);
-  const [units, setUnits] = useState<unit[]>([]);
 
   useEffect(() => {
-    setUnits(prev => prev.map(u => u && u.id ? u : { ...(u || {}), id: uuid.v4().toString() }));
+    // ensure units have ids
+    setUnits((prev: any[]) => prev.map(u => u && u.id ? u : { ...(u || {}), id: uuid.v4().toString() }))
   }, []);
 
   const addModule = () => {
@@ -221,28 +234,28 @@ const Step3 = ({mode, type}: step3Props) => {
       coeff: 0,
       semester: selectedSem as 's1' | 's2'
     }
-    setModules(prev => [...prev, m])
+    setModules((prev: any[]) => [...prev, m])
   }
 
   const updateModule = (updated: moduleStruct) => {
-    setModules(prev => prev.map(m => m.id === updated.id ? updated : m))
+    setModules((prev: any[]) => prev.map(m => m.id === updated.id ? updated : m))
   }
 
   const deleteModule = (deleted: moduleStruct) => {
-    setModules(prev => prev.filter(m => m.id !== deleted.id))
+    setModules((prev: any[]) => prev.filter(m => m.id !== deleted.id))
   }
 
   const addUnit = () => {
-    const u: unit = { id: uuid.v4().toString(), title: `Unit ${units.length + 1}`, modules: [], semester: selectedSem as 's1' | 's2' }
-    setUnits(prev => [...prev, u])
+    const u: unit = { id: uuid.v4().toString(), title: `${t('apps.unit')}  ${units.length + 1}`, modules: [], semester: selectedSem as 's1' | 's2' }
+    setUnits((prev: any[]) => [...prev, u])
   }
 
   const updateUnitModules = (id: string, mods: advancedModuleStruct[]) => {
-    setUnits(prev => prev.map((u) => u.id === id ? { ...u, modules: mods } : u))
+    setUnits((prev: any[]) => prev.map((u: any) => u.id === id ? { ...u, modules: mods } : u))
   }
 
   const deleteUnit = (id: string) => {
-    setUnits(prev => prev.filter((u) => u.id !== id))
+    setUnits((prev: any[]) => prev.filter((u: any) => u.id !== id))
   }
 
   return(
@@ -252,15 +265,15 @@ const Step3 = ({mode, type}: step3Props) => {
         </View>
         {(mode==="single" || selectedSem === "s1") &&
           <ScrollView className='flex-1 flex-col' showsVerticalScrollIndicator={false}>
-            {type==="simple" && modules.filter(m => m.semester === selectedSem).map(module => (
+            {type==="simple" && modules.filter((m: any) => m.semester === selectedSem).map((module: any) => (
               <Module
                 key={module.id}
                 module={module}
-                onChange={(m) => updateModule(m)}
-                onDelete={(m) => deleteModule(m)}
+                onChange={(m: any) => updateModule(m)}
+                onDelete={(m: any) => deleteModule(m)}
               />
             ))}
-            {type==="advanced" && units.filter(u => u && u.semester === selectedSem).map((unit, idx) => {
+            {type==="advanced" && units.filter((u: any) => u && u.semester === selectedSem).map((unit: any, idx: number) => {
               const safeModules = Array.isArray(unit?.modules) ? unit.modules : [];
               const key = unit?.id ?? `unit-${idx}`;
               return (
@@ -269,14 +282,15 @@ const Step3 = ({mode, type}: step3Props) => {
                   title={unit?.title}
                   initialModules={safeModules as any}
                   semester={unit?.semester}
-                  onChange={(mods) => unit?.id && updateUnitModules(unit.id, mods as any)}
-                  onDelete={(mods) => unit?.id && updateUnitModules(unit.id, mods as any)}
+                  onChange={(mods: any) => unit?.id && updateUnitModules(unit.id, mods as any)}
+                  onDelete={(mods: any) => unit?.id && updateUnitModules(unit.id, mods as any)}
                   onRemove={() => unit?.id && deleteUnit(unit.id)}
                 />
               )
             })}
             <View className='mt-4'>
-              {type==="advanced"? <AddUnitButton onPress={addUnit} />: <AddModuleButton onPress={addModule} />}
+                {type==="advanced"? <AddUnitButton onPress={addUnit} />: <AddModuleButton onPress={addModule} />}
+                {error && <ThemedText className='text-xs mt-2' style={{color: '#f01e2c'}}>{error}</ThemedText>}
             </View>
           </ScrollView>}
         {(mode==="dual" && selectedSem === "s2") &&
@@ -311,13 +325,230 @@ const Step3 = ({mode, type}: step3Props) => {
       </>
   )
 }
-const Step4 = () => {
+const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, setFinishModal}: any) => {
   const { t, i18n } = useTranslation();
-  const [selectedMode, setSelectedMode] = useState('');
   const { colorScheme, setColorScheme  } = useColorScheme();
+  const [selectedSem, setSelectedSem] = useState<'s1' | 's2'>('s1')
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isSavingLocal, setIsSavingLocal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [successType, setSuccessType] = useState<'save' | 'publish' | null>(null);
+
+  const { univ, lvl, spec } = useLocalSearchParams() as any;
+
+  useEffect(() => {
+    // Reset success state when modal closes
+    if (!finishModal) {
+      setShowSuccess(false);
+      setSuccessMessage('');
+      setSuccessType(null);
+    }
+  }, [finishModal]);
+
+  const computeModuleAvg = (m: any) => {
+    if (typeof m.avg === 'number') return m.avg
+    if (m.notes && m.weights) {
+      const exam = m.notes.exam ?? 0
+      const td = m.notes.td ?? 0
+      const tp = m.notes.tp ?? 0
+      return parseFloat((exam * (m.weights.exam ?? 0) + td * (m.weights.td ?? 0) + tp * (m.weights.tp ?? 0)).toFixed(2))
+    }
+    return 0
+  }
+
+  const computeSemesterAvgAdvanced = () => {
+    const semUnits = units.filter((u: any) => (u.semester ?? 's1') === selectedSem)
+    let totalWeight = 0
+    let weightedSum = 0
+    semUnits.forEach((u: any) => {
+      const mods = Array.isArray(u.modules) ? u.modules : []
+      const unitWeight = mods.reduce((s: number, m: any) => s + (m.credit ?? m.coeff ?? 0), 0)
+      const unitAvg = unitWeight > 0 ? (mods.reduce((s: number, m: any) => s + computeModuleAvg(m) * (m.credit ?? m.coeff ?? 0), 0) / unitWeight) : 0
+      totalWeight += unitWeight
+      weightedSum += unitAvg * unitWeight
+    })
+    return totalWeight > 0 ? parseFloat((weightedSum / totalWeight).toFixed(2)) : 0
+  }
+
+  const computeSemesterAvgSimple = () => {
+    const semMods = modules.filter((m: any) => (m.semester ?? 's1') === selectedSem)
+    const totalCoeff = semMods.reduce((s: number, m: any) => s + (m.coeff ?? 0), 0)
+    const weighted = semMods.reduce((s: number, m: any) => s + (computeModuleAvg(m) * (m.coeff ?? 0)), 0)
+    return totalCoeff > 0 ? parseFloat((weighted / totalCoeff).toFixed(2)) : 0
+  }
+
+  const semesterAvg = type === 'advanced' ? computeSemesterAvgAdvanced() : computeSemesterAvgSimple()
+
+  const handleModuleChange = (updated: any) => {
+    setModules?.((prev: any[]) => prev.map(m => m.id === updated.id ? updated : m))
+  }
+
+  const handleUnitChange = (unitId: string, mods: any[]) => {
+    setUnits?.((prev: any[]) => prev.map(u => u.id === unitId ? { ...u, modules: mods } : u))
+  }
+
+  const handlePublish = async () => {
+    setIsPublishing(true);
+    setShowSuccess(false);
+    try {
+      const deviceId = await AsyncStorage.getItem('device-id');
+      if (!deviceId) {
+        Alert.alert(i18n.t('control.error'), i18n.t('create.errors.noDevice') || 'Device ID not found');
+        setIsPublishing(false);
+        return;
+      }
+
+      const calculatorData = {
+        id: uuid.v4().toString(),
+        type,
+        mode,
+        univ,
+        lvl,
+        spec,
+        modules,
+        units,
+      };
+
+      const result = await publishCalculator(calculatorData, deviceId);
+
+      if (result.success) {
+        setSuccessMessage(result.message);
+        setSuccessType('publish');
+        setShowSuccess(true);
+        setTimeout(() => {
+          setFinishModal(false);
+          router.replace('/(root)/(tabs)/create');
+        }, 2000);
+      } else {
+        Alert.alert(i18n.t('control.error'), result.message);
+      }
+    } catch (error) {
+      Alert.alert(i18n.t('control.error'), i18n.t('create.errors.publishError') || 'An error occurred');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const handleSaveLocal = async () => {
+    setIsSavingLocal(true);
+    setShowSuccess(false);
+    try {
+      const deviceId = await AsyncStorage.getItem('device-id');
+      if (!deviceId) {
+        Alert.alert(i18n.t('control.error'), i18n.t('create.errors.noDevice') || 'Device ID not found');
+        setIsSavingLocal(false);
+        return;
+      }
+
+      const calculatorData = {
+        id: uuid.v4().toString(),
+        type,
+        mode,
+        univ,
+        lvl,
+        spec,
+        modules,
+        units,
+      };
+
+      const success = await saveCalculatorLocally(calculatorData, deviceId);
+
+      if (success) {
+        setSuccessMessage(i18n.t('create.success.savedLocal') || 'Calculator saved to local database!');
+        setSuccessType('save');
+        setShowSuccess(true);
+        setTimeout(() => {
+          setFinishModal(false);
+          router.replace('/(root)/(tabs)/create');
+        }, 2000);
+      } else {
+        Alert.alert(i18n.t('control.error'), i18n.t('create.errors.saveFailed') || 'Failed to save calculator');
+      }
+    } catch (error) {
+      Alert.alert(i18n.t('control.error'), i18n.t('create.errors.saveError') || 'An error occurred while saving');
+    } finally {
+      setIsSavingLocal(false);
+    }
+  };
 
   return(
       <>
+        <View className='mb-4'>
+          <SemesterSlider setSem={(s:string)=> setSelectedSem(s as 's1'|'s2')} />
+          <View className='flex-row items-center justify-between mt-4 px-2'>
+            <ThemedText className='text-sm opacity-60'>{t('apps.average')}</ThemedText>
+            <ThemedText className='text-lg font-Poppins-Bold'>{`${semesterAvg}/20`}</ThemedText>
+          </View>
+        </View>
+
+        {type === 'simple' && (
+          <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
+            {modules.filter((m:any)=> (m.semester ?? 's1') === selectedSem).map((m: any) => (
+              <CalculatorModule key={m.id} module={m} onChange={handleModuleChange} />
+            ))}
+          </ScrollView>
+        )}
+
+        {type === 'advanced' && (
+          <ScrollView className='flex-1' showsVerticalScrollIndicator={false}>
+            {units.filter((u:any)=> (u.semester ?? 's1') === selectedSem).map((u: any) => (
+              <CalculatorUnit key={u.id} unit={u} onChange={(mods:any)=> handleUnitChange(u.id, mods)} />
+            ))}
+          </ScrollView>
+        )}
+        <CustomModal title={t("control.finish")} visible={finishModal} toggle={() => !isPublishing && !isSavingLocal && setFinishModal(false)}>
+        <View className='flex-1 flex-col p-4'>
+          {!showSuccess ? (
+            <>
+              <Images.finish />
+              <ButtonPrimary 
+                text={isPublishing ? i18n.t('control.publishing') || 'Publishing...' : i18n.t('control.publish')} 
+                h='h-14' 
+                onPress={handlePublish}
+                disabled={isPublishing || isSavingLocal}
+              />
+              {isPublishing && (
+                <View className='flex-row items-center justify-center mt-3'>
+                  <ActivityIndicator size="small" color="#f15758" />
+                  <ThemedText className='ml-2 text-sm'>{i18n.t('control.publishing') || 'Publishing...'}</ThemedText>
+                </View>
+              )}
+              <TouchableOpacity 
+                disabled={isSavingLocal || isPublishing}
+                className="flex-row items-center mt-4 justify-center gap-4 py-2 rounded-xl h-14" 
+                style={{backgroundColor: "rgba(255,85,85,0.15)", opacity: isSavingLocal || isPublishing ? 0.5 : 1}}>
+                <Icons.SavePrimary />
+                <Text 
+                  onPress={handleSaveLocal}
+                  className={`text-lg font-Poppins-Medium`}
+                  style={{color: '#f15758'}}
+                >
+                  {isSavingLocal ? i18n.t('control.saving') || 'Saving...' : t('control.saveToLocal')}
+                </Text>
+              </TouchableOpacity>
+              {isSavingLocal && (
+                <View className='flex-row items-center justify-center mt-3'>
+                  <ActivityIndicator size="small" color="#f15758" />
+                  <ThemedText className='ml-2 text-sm'>{i18n.t('control.saving') || 'Saving...'}</ThemedText>
+                </View>
+              )}
+            </>
+          ) : (
+            <View className='flex-1 flex-col items-center justify-center py-8'>
+              <View className='mb-6'>
+                <Text style={{fontSize: 48}}>✓</Text>
+              </View>
+              <ThemedText className='text-xl font-Poppins-Bold text-center mb-3'>
+                {i18n.t('control.success')}
+              </ThemedText>
+              <ThemedText className='text-sm text-center opacity-70 px-4'>
+                {successMessage}
+              </ThemedText>
+            </View>
+          )}
+        </View>
+      </CustomModal>
       </>
   )
 }
@@ -334,17 +565,50 @@ export default function CreateStepper() {
   const [univ, setUniv] = useState("");
   const [lvl, setLvl] = useState("");
   const [spec, setSpec] = useState("");
+  const [units, setCalculatorUnits] = useState([]);
+  const [modules, setCalculatorModules] = useState([]);
+  const [stepErrors, setStepErrors] = useState<{[k:number]: string}>({});
+  const [deviceId, setDeviceId] = useState('');
+  const [publisherId, setPublisherId] = useState(null);
+  const [finishModalOpen, setFinishModalOpen] = useState(false);
 
   const steps = [
-    <Step1 setLvl={setLvl} setSpec={setSpec} setUniv={setUniv} />,
-    <Step2 setMode={setMode}/>,
-    <Step3 mode={mode as string} type={type as string}/>,
-    <Step4 />,
+    <Step1 setLvl={setLvl} setSpec={setSpec} setUniv={setUniv} error={stepErrors[0]} />,
+    <Step2 setMode={setMode} error={stepErrors[1]}/> ,
+    <Step3 mode={mode as string} type={type as string} modules={modules} setModules={setCalculatorModules} units={units} setUnits={setCalculatorUnits} error={stepErrors[2]} /> ,
+    <Step4 modules={modules} units={units} mode={mode} type={type} setModules={setCalculatorModules} setUnits={setCalculatorUnits} finishModal = {finishModalOpen} setFinishModal = {setFinishModalOpen}/>,
   ]
 
   const goToStep = (nextStep: number) => {
     setStep(nextStep)
     translateX.value = withTiming(isRTL ? (width * nextStep) : -(width * nextStep), { duration: 300 })
+  }
+
+  const validateCurrentStep = (current: number) => {
+    const errors: {[k:number]: string} = {}
+    if (current === 0) {
+      if (!univ || !lvl || !spec) errors[0] = i18n.t('create.errors.step1')
+    }
+    if (current === 1) {
+      if (!mode) errors[1] = i18n.t('create.errors.step2')
+    }
+    if (current === 2) {
+      if (type === 'simple') {
+        if (!modules || modules.filter((m:any)=>m).length === 0) errors[2] = i18n.t('create.errors.step3_simple') || 'Add at least one module'
+        else if (modules.some((m:any)=>!(m.name && (m.coeff>0)))) errors[2] = i18n.t('create.errors.step3_module') || 'Modules must have a name and a positive coeff'
+      } else {
+        if (!units || units.length === 0) errors[2] = i18n.t('create.errors.step3_advanced')
+        else if (units.some((u:any)=>!u.modules || u.modules.length===0)) errors[2] = i18n.t('create.errors.step3_unit')
+      }
+    }
+    setStepErrors(errors)
+    return !errors[current]
+  }
+
+  const handleContinue = () => {
+    if (validateCurrentStep(step)) {
+      goToStep(step + 1)
+    }
   }
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -355,16 +619,16 @@ export default function CreateStepper() {
   const { height } = useWindowDimensions();
 
   return (
-    <SafeAreaView className='flex-1 py-8 bg-background dark:bg-background-dark'>
+    <SafeAreaView className='flex-1 py-4 bg-background dark:bg-background-dark'>
       <TouchableOpacity 
         className={`justify-center items-center p-2 rounded-full bg-black absolute ${I18nManager.isRTL?"right-4":"left-4"}`}
         activeOpacity={0.8}
         style={{
           bottom: insets.bottom + 32,
         }}
-        onPress={()=> router.back()}
+        onPress={()=> router.replace('/(root)/(tabs)/create')}
       >
-        <View style={{ transform: !I18nManager.isRTL?"rotateY(180deg)":"none"}}>
+        <View style={{ transform: I18nManager.isRTL?"rotateY(180deg)":"none"}}>
           <Icons.BackIcon />
         </View>
       </TouchableOpacity>
@@ -378,24 +642,25 @@ export default function CreateStepper() {
         ]}
       >
         {steps.map((Step, index) => (
-          <View key={index} style={{ width}} className='px-8 py-4 max-h-[100%]'>
+          <View key={index} style={{ width}} className='px-4 py-4 max-h-[100%] relative flex-1'>
             {Step}
           </View>
         ))}
       </Animated.View>
 
-      <View className='flex-col items-center justify-center gap-4 px-8'>
+      <View className='flex-col items-center justify-center gap-4 px-4'>
         {step < steps.length - 1 ? (
             <ButtonPrimary 
               text={i18n.t('control.continue')} 
-              h='h-12' 
-              onPress={() => goToStep(step + 1)}
+              h='h-14' 
+              onPress={handleContinue}
             />
         ) : (
           <ButtonPrimary 
               text={i18n.t('control.finish')} 
               h='h-12' 
               onPress={() => {
+                setFinishModalOpen(true)
               }}
             />
         )}

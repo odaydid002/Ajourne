@@ -4,7 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next';
 import { useColorScheme } from 'nativewind';
 import { ThemedText } from '@/components/text/ThemedText';
-import Icons from '@/constants/icons';
+import Icons from '@/components/text/icons';
 import { router } from 'expo-router';
 import { ReactNode, useState } from 'react';
 import SettingOption from '@/components/containers/SettingOption';

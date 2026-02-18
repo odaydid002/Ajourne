@@ -1,9 +1,21 @@
 const UsageModel = require('../models/usageModel');
 const CalculatorModel = require('../models/calculatorModel');
+const DeviceModel = require('../models/deviceModel');
 
 exports.trackUsage = async (req, res) => {
   try {
-    const { calculator_id, device_id } = req.body;
+    let { calculator_id, device_id, device_name, device_age, device_speciality, device_level, device_university } = req.body;
+
+    if (!device_id && (device_name || device_age || device_speciality || device_level || device_university)) {
+      const dev = await DeviceModel.create({
+        name: device_name || null,
+        age: device_age || null,
+        speciality: device_speciality || null,
+        level: device_level || null,
+        university: device_university || null
+      });
+      device_id = dev.id;
+    }
 
     if (!calculator_id || !device_id) {
       return res.status(400).json({

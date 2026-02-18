@@ -1,4 +1,4 @@
-import Icons from '@/constants/icons';
+import Icons from '@/components/text/icons';
 import { Checkbox } from 'expo-checkbox';
 import { useColorScheme } from "nativewind";
 import React, { useEffect, useState } from 'react';

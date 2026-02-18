@@ -35,6 +35,9 @@ router.post('/calculators/:id/publish', calculatorController.publishCalculator);
 // Calculators by publisher
 router.get('/publishers/:publisherId/calculators', calculatorController.getCalculatorsByPublisher);
 
+// Create calculator with full structure (semesters, units, modules) for a publisher
+router.post('/publishers/:publisherId/calculators/all-in-one', calculatorController.createCalculatorAllInOne);
+
 // Calculators by device
 router.get('/devices/:deviceId/calculators', calculatorController.getCalculatorsByDevice);
 

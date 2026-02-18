@@ -1,11 +1,12 @@
 const CalculatorModel = require('../models/calculatorModel');
 const PublisherModel = require('../models/publisherModel');
+const db = require('../config/db');
 const { validateCalculator } = require('../validators');
 const { v4: uuidv4 } = require('uuid');
 
 exports.createCalculator = async (req, res) => {
   try {
-    const { title, description, type, device_id, publisher_id } = req.body;
+    const { title, description, type, device_id, publisher_id, speciality, level, university_name } = req.body;
 
     const validation = validateCalculator({ title, type });
     if (!validation.valid) {
@@ -22,7 +23,10 @@ exports.createCalculator = async (req, res) => {
       type,
       device_id,
       publisher_id: publisher_id || null,
-      published: publisher_id ? true : false
+      published: publisher_id ? true : false,
+      speciality: speciality || null,
+      level: level || null,
+      university_name: university_name || null
     });
 
     res.status(201).json({
@@ -154,7 +158,7 @@ exports.getCalculatorsByDevice = async (req, res) => {
 exports.updateCalculator = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, type } = req.body;
+    const { title, description, type, speciality, level, university_name } = req.body;
 
     const calculator = await CalculatorModel.getById(id);
     if (!calculator) {
@@ -167,7 +171,10 @@ exports.updateCalculator = async (req, res) => {
     const updated = await CalculatorModel.update(id, {
       title: title || calculator.title,
       description: description !== undefined ? description : calculator.description,
-      type: type || calculator.type
+      type: type || calculator.type,
+      speciality: typeof speciality !== 'undefined' ? speciality : calculator.speciality,
+      level: typeof level !== 'undefined' ? level : calculator.level,
+      university_name: typeof university_name !== 'undefined' ? university_name : calculator.university_name
     });
 
     res.status(200).json({
@@ -286,5 +293,112 @@ exports.searchCalculators = async (req, res) => {
       success: false,
       error: error.message
     });
+  }
+};
+
+// Create calculator and nested semesters / units / modules in one request
+exports.createCalculatorAllInOne = async (req, res) => {
+  const { publisherId } = req.params;
+  const { title, description, type, device_id, structure, speciality, level, university_name } = req.body;
+
+  if (!title || !type) {
+    return res.status(400).json({ success: false, error: 'title and type are required' });
+  }
+
+  try {
+    const publisher = await PublisherModel.getById(publisherId);
+    if (!publisher) {
+      return res.status(404).json({ success: false, error: 'Publisher not found' });
+    }
+
+    const trx = await db.transaction();
+    try {
+      const [calculator] = await trx('calculators')
+        .insert({
+          id: uuidv4(),
+          title,
+          description: description || null,
+          type,
+          device_id: device_id || null,
+          publisher_id: publisherId,
+          published: true,
+          speciality: speciality || null,
+          level: level || null,
+          university_name: university_name || null
+        })
+        .returning('*');
+
+      const semestersMap = {};
+
+      const getOrCreateSemester = async (name) => {
+        if (!name) name = 's1';
+        if (semestersMap[name]) return semestersMap[name];
+        const [sem] = await trx('semesters')
+          .insert({ id: require('uuid').v4(), calculator_id: calculator.id, name })
+          .returning('*');
+        semestersMap[name] = sem;
+        return sem;
+      };
+
+      if (type === 'simple') {
+        const items = Array.isArray(structure) ? structure : req.body.modules || [];
+        for (const it of items) {
+          const sem = await getOrCreateSemester(it.semester || 's1');
+          const moduleData = {
+            id: it.id || require('uuid').v4(),
+            semester_id: sem.id,
+            unit_id: null,
+            name: it.name || '',
+            coeff: typeof it.coeff !== 'undefined' ? it.coeff : 0,
+            has_td: !!it.hasTd,
+            has_tp: !!it.hasTp,
+            credit: it.credit || null,
+            weight_exam: it.weight_exam || null,
+            weight_td: it.weight_td || null,
+            weight_tp: it.weight_tp || null
+          };
+          await trx('modules').insert(moduleData);
+        }
+      } else if (type === 'advanced') {
+        const units = Array.isArray(structure) ? structure : req.body.units || [];
+        for (const u of units) {
+          const sem = await getOrCreateSemester(u.semester || 's1');
+          const [unit] = await trx('units')
+            .insert({ id: u.id || require('uuid').v4(), semester_id: sem.id, title: u.title || '' })
+            .returning('*');
+
+          const mods = Array.isArray(u.modules) ? u.modules : [];
+          for (const m of mods) {
+            const moduleData = {
+              id: m.id || require('uuid').v4(),
+              semester_id: sem.id,
+              unit_id: unit.id,
+              name: m.name || '',
+              coeff: typeof m.coeff !== 'undefined' ? m.coeff : 0,
+              has_td: !!m.hasTd,
+              has_tp: !!m.hasTp,
+              credit: m.credit || null,
+              weight_exam: m.weight_exam || null,
+              weight_td: m.weight_td || null,
+              weight_tp: m.weight_tp || null
+            };
+            await trx('modules').insert(moduleData);
+          }
+        }
+      } else {
+        await trx.rollback();
+        return res.status(400).json({ success: false, error: 'Invalid calculator type' });
+      }
+
+      await trx.commit();
+
+      const created = await CalculatorModel.getById(calculator.id);
+      return res.status(201).json({ success: true, data: { calculator: created } });
+    } catch (innerErr) {
+      await trx.rollback();
+      throw innerErr;
+    }
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
   }
 };

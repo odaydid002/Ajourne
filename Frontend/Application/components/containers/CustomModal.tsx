@@ -2,7 +2,7 @@ import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native'
 import React, { ReactNode, useState } from 'react'
 import { Portal } from 'react-native-paper';
 import { ThemedText } from '../text/ThemedText';
-import Icons from '@/constants/icons';
+import Icons from '@/components/text/icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { useTranslation } from 'react-i18next';

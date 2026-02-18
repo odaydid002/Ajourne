@@ -4,7 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next';
 import { useColorScheme } from 'nativewind';
 import { ThemedText } from '@/components/text/ThemedText';
-import Icons from '@/constants/icons';
+import Icons from '@/components/text/icons';
 import SettingOption from '@/components/containers/SettingOption';
 import { router } from 'expo-router';
 import images from '@/constants/images';
@@ -19,7 +19,7 @@ const Create = () => {
 
   return (
     <>
-      <SafeAreaView className='bg-background dark:bg-background-dark p-8 flex-1'>
+      <SafeAreaView className='bg-background dark:bg-background-dark px-4 py-8 flex-1'>
         <ThemedText className='text-2xl font-Poppins-Medium font-bold'>{t("create.selectType")}</ThemedText>
         <SettingOption className='border-2 border-inp mt-8 mb-2 p-6' touchable onPress={()=>{router.push({pathname: '/CreateStepper', params: { type: 'simple' }})}}>
           <View className='flex-1 flex-col gap-2 py-2'>

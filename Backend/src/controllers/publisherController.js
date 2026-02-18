@@ -1,11 +1,12 @@
 const PublisherModel = require('../models/publisherModel');
+const DeviceModel = require('../models/deviceModel');
 const { validatePublisher } = require('../validators');
 
 exports.registerPublisher = async (req, res) => {
   try {
-    const { name, email, device_id } = req.body;
+    const { name, email, device_id, device_name, device_age, device_speciality, device_level, device_university } = req.body;
 
-    const validation = validatePublisher({ name, email, device_id });
+    const validation = validatePublisher({ name, email });
     if (!validation.valid) {
       return res.status(400).json({
         success: false,
@@ -21,10 +22,22 @@ exports.registerPublisher = async (req, res) => {
       });
     }
 
+    let finalDeviceId = device_id || null;
+    if (!finalDeviceId && (device_name || device_age || device_speciality || device_level || device_university)) {
+      const dev = await DeviceModel.create({
+        name: device_name || null,
+        age: device_age || null,
+        speciality: device_speciality || null,
+        level: device_level || null,
+        university: device_university || null
+      });
+      finalDeviceId = dev.id;
+    }
+
     const publisher = await PublisherModel.create({
       name,
       email,
-      device_id
+      device_id: finalDeviceId
     });
 
     res.status(201).json({

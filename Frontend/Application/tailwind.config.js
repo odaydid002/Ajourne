@@ -32,7 +32,8 @@ module.exports = {
         },
         "primary": {
           100: '#FF5555',
-          200: '#FF937E'
+          200: '#FF937E',
+          "trans": "rgba(255, 85, 85, 0.2)"
         },
         "secondary": {
           100: "#A3D78A",

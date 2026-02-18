@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ThemedText } from '../text/ThemedText';
 import images from '@/constants/images';
 import { colorScheme } from 'nativewind';
-import Icons from '@/constants/icons';
+import Icons from '@/components/text/icons';
 
 interface CalculatorAppProps {
   name: string;
@@ -18,8 +18,8 @@ interface CalculatorAppProps {
 const CalculatorApp = ({name, university, level, rate, mode, annual}: CalculatorAppProps) => {
     const {t, i18n } = useTranslation();
     return (
-    <View className='flex-row justify-between items-center bg-container dark:bg-container-dark rounded-xl p-4 w-full'
-        style={{boxShadow: '2px 4px 3px rgba(0, 0, 0, 0.1)'}}
+    <View className='flex-row justify-between items-center bg-container dark:bg-container-dark rounded-xl p-4 w-full h-20'
+        style={{boxShadow: '2px 4px 2px rgba(0, 0, 0, 0.1)'}}
     >
         <View className='flex-row gap-4 flex-1 items-center'>
             <View className='justify-center items-center flex-col rounded overflow-hidden' style={{width: 40, height: 40}}>

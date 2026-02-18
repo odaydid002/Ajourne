@@ -1,11 +1,23 @@
 const RatingModel = require('../models/ratingModel');
 const CalculatorModel = require('../models/calculatorModel');
+const DeviceModel = require('../models/deviceModel');
 const { validateRating } = require('../validators');
 const { v4: uuidv4 } = require('uuid');
 
 exports.rateCalculator = async (req, res) => {
   try {
-    const { calculator_id, device_id, rating } = req.body;
+    let { calculator_id, device_id, rating, device_name, device_age, device_speciality, device_level, device_university } = req.body;
+
+    if (!device_id && (device_name || device_age || device_speciality || device_level || device_university)) {
+      const dev = await DeviceModel.create({
+        name: device_name || null,
+        age: device_age || null,
+        speciality: device_speciality || null,
+        level: device_level || null,
+        university: device_university || null
+      });
+      device_id = dev.id;
+    }
 
     const validation = validateRating({ calculator_id, device_id, rating });
     if (!validation.valid) {

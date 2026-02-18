@@ -1,7 +1,7 @@
 import CalculatorApp from '@/components/containers/CalculatorApp';
 import { ThemedText } from "@/components/text/ThemedText";
 import { gradients } from "@/constants/gradient";
-import Icons from '@/constants/icons';
+import Icons from '@/components/text/icons';
 import images from '@/constants/images';
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from 'expo-router';
@@ -173,7 +173,7 @@ const Home = () => {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <View className='flex-row items-center justify-between px-8 mt-5'>
+            <View className='flex-row items-center justify-between px-4 mt-5'>
               <View className='flex-row items-center'>
                 <ThemedText className='text-lg font-Poppins-Bold font-bold mr-2'>{t('home.mostUsed')}</ThemedText>
                 {colorScheme === "dark" ? <Icons.FireIcon width={25} height={25}/> : <Icons.FireDarkIcon width={25} height={25} opacity={0.5}/>}
@@ -184,7 +184,7 @@ const Home = () => {
                 <Text className='text-secondary-darker text-sm font-bold font-Poppins-Bold'>{t('control.viewAll')}</Text>
               </TouchableOpacity>
             </View>
-            <View className="flex-col gap-4 px-8 mt-4">
+            <View className="flex-col gap-4 px-4 mt-4">
               {mostUsed.map((item, index) => (
                 <TouchableHighlight 
                   key={item.id}>

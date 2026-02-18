@@ -2,15 +2,17 @@ import { SplashScreen, Slot } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import { useFonts } from 'expo-font';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
 
 import './global.css';
 import '@/i18n';
 import { bootstrapLanguage } from '@/i18n/languageBootstrap';
 import { Provider, PaperProvider } from 'react-native-paper';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { initDatabase } from '@/database';
+// import { debugDatabase } from '@/database/debugDatabase'; // Uncomment to use debug functions
+
+import uuid from 'react-native-uuid'
 
 SplashScreen.preventAutoHideAsync();
 
@@ -50,7 +52,22 @@ export default function RootLayout() {
         console.error('Database initialization failed:', err);
       }
 
-      // 4. Hide splash screen and mark ready
+      // await debugDatabase.logAllTables();
+      // await debugDatabase.logTable('calculators', 50);
+      // await debugDatabase.logTable('semesters');
+      // await debugDatabase.logTable('modules');
+      // await debugDatabase.logStats();
+      // await debugDatabase.healthCheck();
+
+      // 4. Initialize device ID (publisher will be registered on first publish)
+      let deviceID = await AsyncStorage.getItem('device-id');
+      if (!deviceID) {
+        deviceID = uuid.v4().toString();
+        await AsyncStorage.setItem('device-id', deviceID);
+        console.log('Device ID created:', deviceID);
+      }
+
+      // 5. Hide splash screen and mark ready
       await SplashScreen.hideAsync();
       setReady(true);
     };
@@ -64,7 +81,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <PaperProvider>
         <Provider>
-          <Slot />
+          <Slot/>
         </Provider>
       </PaperProvider>
     </SafeAreaProvider>

@@ -1,9 +1,9 @@
-import icons from "@/constants/icons";
+import icons from "@/components/text/icons";
 import { useMemo, useState } from "react";
 import { FlatList, Image, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { ThemedText } from "../text/ThemedText";
 import { useColorScheme } from "nativewind";
-import Icons from "@/constants/icons";
+import Icons from "@/components/text/icons";
 import { useTranslation } from "react-i18next";
 
 interface SelectInputProps {

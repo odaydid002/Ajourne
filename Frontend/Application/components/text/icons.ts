@@ -97,12 +97,14 @@ import SaveIcon from "@/assets/icons/save.svg";
 import CreateSimpleIcon from "@/assets/icons/simple.svg";
 import CreateAdvancedIcon from "@/assets/icons/advanced.svg";
 import AddUnitPrimary from "@/assets/icons/dark/add_unit_primary.svg";
+import SavePrimary from "@/assets/icons/save_primary.svg";
 
 export default {
     CreateSimpleIcon,
     CreateAdvancedIcon,
     AddUnitPrimary,
     SaveIcon,
+    SavePrimary,
     Facebook,
     Instagram,
     LinkedIn,

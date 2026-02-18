@@ -44,7 +44,18 @@
     "advanced":"Advanced",
     "infoSaved": "Data saved successfully",
     "semester1": "Semester 1",
-    "semester2": "Semester 2"
+    "semester2": "Semester 2",
+    "ok": "OK",
+    "error": "Error",
+    "success": "Success",
+    "publishing": "Publishing...",
+    "saving": "Saving...",
+    "loading": "Loading...",
+    "online": "Online",
+    "offline": "Offline",
+    "noData": "No data available",
+    "info": "Information",
+    "back": "Back"
   },
 
   "mode": {
@@ -107,15 +118,37 @@
     "step3": {
       "title": "How many semesters?",
       "oneSemester": "One Semester Only",
-      "twoSemester": "Annual (Two Semesters)"
+      "twoSemester": "Annual (Two Semesters)",
+      "selectSemester": "Select Semester"
     },
     "step4": {
       "example": "e.g. English"
+    },
+    "errors": {
+      "step1": "All fields must be filled in",
+      "step2": "The number of semesters must be chosen",
+      "step3_simple": "Add at least one module",
+      "step3_module": "Modules must have a name and a positive coefficient",
+      "step3_advanced": "At least one unit must be added",
+      "step3_unit": "Each unit must contain at least one module",
+      "noPublisher": "You must register as a publisher to publish calculators",
+      "noDevice": "Device ID not found",
+      "publishFailed": "Failed to publish calculator",
+      "publishError": "An error occurred while publishing",
+      "saveFailed": "Failed to save calculator",
+      "saveError": "An error occurred while saving",
+      "notFound": "Calculator not found",
+      "loadFailed": "Failed to load calculator"
+    },
+    "success": {
+      "published": "Calculator published successfully!",
+      "savedLocal": "Calculator saved to local database!"
     }
   },
 
   "apps": {
     "moduleName": "Module Name",
+    "unknown": "Unknown Module",
     "coeff": "Coeff",
     "credit": "Credit",
     "unit": "Unit",
@@ -131,6 +164,7 @@
     "addUnit": "Add New Unit",
     "total": "Total",
     "average": "Average",
+    "unitAvg": "Unit Average",
     "failed": "Failed",
     "success": "Success",
     "dette": "Success with credits"

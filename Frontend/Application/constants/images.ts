@@ -48,10 +48,12 @@ import defaultUniv from "@/assets/images/default_univ.png";
 
 import checkSvg from '@/assets/images/check.svg'
 import questionSvg from '@/assets/images/question.svg'
+import finish from '@/assets/images/finish.svg'
 
 export default {
     homeBG,
     ENSC,
+    finish,
     checkSvg,
     questionSvg,
     Constantine1,
