@@ -9,6 +9,8 @@ export interface CalculatorData {
   id: string;
   type: 'simple' | 'advanced';
   mode: 'single' | 'dual';
+  title?: string;
+  description?: string;
   univ: string;
   lvl: string;
   spec: string;
@@ -58,8 +60,8 @@ export const saveCalculatorLocally = async (
         calculatorData.id,
         deviceId,
         calculatorData.type,
-        `${calculatorData.spec} - ${calculatorData.mode === 'single' ? 'S1' : 'S1 & S2'}`,
-        `Calculator for ${calculatorData.univ}`,
+        calculatorData.title || `${calculatorData.spec} - ${calculatorData.mode === 'single' ? 'S1' : 'S1 & S2'}`,
+        calculatorData.description || `Calculator for ${calculatorData.univ}`,
         0,
         calculatorData.spec,
         calculatorData.lvl,
@@ -237,10 +239,10 @@ export const publishCalculator = async (
 
     // Prepare the full calculator structure for the API
     const calculatorPayload = {
-      title: `${calculatorData.spec} - ${
+      title: calculatorData.title || `${calculatorData.spec} - ${
         calculatorData.mode === 'single' ? 'Semester 1' : 'Semester 1 & 2'
       }`,
-      description: `Calculator for ${calculatorData.univ} - Level: ${calculatorData.lvl}`,
+      description: calculatorData.description || `Calculator for ${calculatorData.univ} - Level: ${calculatorData.lvl}`,
       type: calculatorData.type,
       device_id: deviceId,
       publisher_id: publisherId,

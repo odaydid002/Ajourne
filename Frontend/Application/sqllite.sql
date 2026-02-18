@@ -1,6 +1,11 @@
 -- 1. Devices
 CREATE TABLE devices (
     id TEXT PRIMARY KEY,
+    name TEXT,
+    age INTEGER,
+    speciality TEXT,
+    level TEXT,
+    university TEXT,
     created_at TEXT
 );
 

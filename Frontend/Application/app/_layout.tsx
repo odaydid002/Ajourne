@@ -59,13 +59,16 @@ export default function RootLayout() {
       // await debugDatabase.logStats();
       // await debugDatabase.healthCheck();
 
-      // 4. Initialize device ID (publisher will be registered on first publish)
+      await AsyncStorage.setItem('device-id', "4ec853d7-ed0f-434f-9f26-058b6bd412a0");
+      await AsyncStorage.setItem('publisher-id', "1afa5ce2-e3a8-4924-9b38-0c6a61d10477");
+
+      /* 4. Initialize device ID
       let deviceID = await AsyncStorage.getItem('device-id');
       if (!deviceID) {
         deviceID = uuid.v4().toString();
         await AsyncStorage.setItem('device-id', deviceID);
         console.log('Device ID created:', deviceID);
-      }
+      }*/
 
       // 5. Hide splash screen and mark ready
       await SplashScreen.hideAsync();

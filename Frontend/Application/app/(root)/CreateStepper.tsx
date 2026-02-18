@@ -325,7 +325,7 @@ const Step3 = ({mode, type, modules, setModules, units, setUnits, error}: any) =
       </>
   )
 }
-const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, setFinishModal}: any) => {
+const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, setFinishModal, univ, lvl, spec}: any) => {
   const { t, i18n } = useTranslation();
   const { colorScheme, setColorScheme  } = useColorScheme();
   const [selectedSem, setSelectedSem] = useState<'s1' | 's2'>('s1')
@@ -334,8 +334,10 @@ const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, s
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [successType, setSuccessType] = useState<'save' | 'publish' | null>(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
 
-  const { univ, lvl, spec } = useLocalSearchParams() as any;
+  const localParams = useLocalSearchParams() as any;
 
   useEffect(() => {
     // Reset success state when modal closes
@@ -392,6 +394,12 @@ const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, s
     setIsPublishing(true);
     setShowSuccess(false);
     try {
+      if (!title.trim()) {
+        Alert.alert(i18n.t('control.error'), 'Please enter a title');
+        setIsPublishing(false);
+        return;
+      }
+
       const deviceId = await AsyncStorage.getItem('device-id');
       if (!deviceId) {
         Alert.alert(i18n.t('control.error'), i18n.t('create.errors.noDevice') || 'Device ID not found');
@@ -403,12 +411,14 @@ const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, s
         id: uuid.v4().toString(),
         type,
         mode,
+        title,
+        description,
         univ,
         lvl,
         spec,
         modules,
         units,
-      };
+      ];
 
       const result = await publishCalculator(calculatorData, deviceId);
 
@@ -445,6 +455,8 @@ const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, s
         id: uuid.v4().toString(),
         type,
         mode,
+        title,
+        description,
         univ,
         lvl,
         spec,
@@ -502,6 +514,42 @@ const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, s
           {!showSuccess ? (
             <>
               <Images.finish />
+              
+              <ThemedText className='text-sm font-Poppins-Medium mt-4 mb-2'>{t('apps.title')}</ThemedText>
+              <TextInput
+                placeholder={t('apps.calculatorTitle') || 'Enter calculator title'}
+                value={title}
+                onChangeText={setTitle}
+                className='bg-input dark:bg-input-dark text-foreground dark:text-foreground-dark mb-4'
+                style={{
+                  borderWidth: 1,
+                  padding: 12,
+                  borderRadius: 8,
+                  borderColor: "rgba(0,0,0,0.2)",
+                  fontSize: 14
+                }}
+                placeholderTextColor={colorScheme === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.5)"}
+              />
+
+              <ThemedText className='text-sm font-Poppins-Medium mb-2'>{t('apps.description')} ({t('control.optional')})</ThemedText>
+              <TextInput
+                placeholder={t('apps.calculatorDescription') || 'Enter calculator description (optional)'}
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={3}
+                className='bg-input dark:bg-input-dark text-foreground dark:text-foreground-dark mb-4'
+                style={{
+                  borderWidth: 1,
+                  padding: 12,
+                  borderRadius: 8,
+                  borderColor: "rgba(0,0,0,0.2)",
+                  fontSize: 14,
+                  textAlignVertical: 'top',
+                }}
+                placeholderTextColor={colorScheme === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.5)"}
+              />
+              
               <ButtonPrimary 
                 text={isPublishing ? i18n.t('control.publishing') || 'Publishing...' : i18n.t('control.publish')} 
                 h='h-14' 
@@ -576,7 +624,7 @@ export default function CreateStepper() {
     <Step1 setLvl={setLvl} setSpec={setSpec} setUniv={setUniv} error={stepErrors[0]} />,
     <Step2 setMode={setMode} error={stepErrors[1]}/> ,
     <Step3 mode={mode as string} type={type as string} modules={modules} setModules={setCalculatorModules} units={units} setUnits={setCalculatorUnits} error={stepErrors[2]} /> ,
-    <Step4 modules={modules} units={units} mode={mode} type={type} setModules={setCalculatorModules} setUnits={setCalculatorUnits} finishModal = {finishModalOpen} setFinishModal = {setFinishModalOpen}/>,
+    <Step4 modules={modules} units={units} mode={mode} type={type} setModules={setCalculatorModules} setUnits={setCalculatorUnits} finishModal = {finishModalOpen} setFinishModal = {setFinishModalOpen} univ={univ} lvl={lvl} spec={spec}/>,
   ]
 
   const goToStep = (nextStep: number) => {
