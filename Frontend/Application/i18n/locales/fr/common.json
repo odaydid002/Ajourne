@@ -17,10 +17,15 @@
     "unknown": "Module inconnue",
     "removeModule": "Supprimer le module",
     "success": "Admis",
+    "overall": "Moyenne général",
     "td": "TD",
     "total": "Total",
     "tp": "TP",
-    "unit": "Unité"
+    "unit": "Unité",
+    "title": "Titre",
+    "calculatorTitle": "Titre de la Calculatrice",
+    "description": "Description",
+    "calculatorDescription": "Description de la Calculatrice"
   },
   "control": {
     "all": "Tout",
@@ -79,7 +84,7 @@
     "offline": "Hors ligne",
     "noData": "Aucune donnée disponible",
     "info": "Informations",
-    "back": "Retour"
+    "optional": "Optionnel"
   },
   "mode": {
     "single": "Calculatrice pour un seul semestre",
@@ -123,7 +128,9 @@
       "saveFailed": "Échec de l'enregistrement du calculateur",
       "saveError": "Une erreur s'est produite lors de l'enregistrement",
       "notFound": "Calculateur non trouvé",
-      "loadFailed": "Échec du chargement du calculateur"
+      "loadFailed": "Échec du chargement du calculateur",
+      "alreadyRegistered": "Email déjà enregistré. Veuillez réessayer plus tard.",
+      "publisherBackendError": "Erreur du serveur. Veuillez réessayer plus tard."
     },
     "success": {
       "published": "Calculateur publié avec succès !",

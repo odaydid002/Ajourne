@@ -53,7 +53,13 @@ export const calculatorService = {
    * Get calculator by ID
    */
   getCalculator: async (id: string): Promise<Calculator> => {
-    return apiRequest(`/calculators/${id}`);
+    const res = await apiRequest(`/calculators/${id}`);
+    // Unwrap common API wrappers
+    if (res && typeof res === 'object') {
+      if (res.data) return res.data;
+      if (res.calculator) return res.calculator;
+    }
+    return res as Calculator;
   },
 
   /**

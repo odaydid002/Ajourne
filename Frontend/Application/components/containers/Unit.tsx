@@ -122,6 +122,31 @@ const AdvancedModule = ({ module, onUpdate, onDelete }: AdvancedModuleProps) => 
   const { t } = useTranslation();
   const { colorScheme } = useColorScheme();
 
+  const [coeffText, setCoeffText] = useState(module.coeff === 0 ? '' : module.coeff.toString());
+  const [creditText, setCreditText] = useState(module.credit === 0 ? '' : module.credit.toString());
+  const [examText, setExamText] = useState(module.weights.exam === 0 ? '' : module.weights.exam.toString());
+  const [tdText, setTdText] = useState(module.weights.td === 0 ? '' : module.weights.td.toString());
+  const [tpText, setTpText] = useState(module.weights.tp === 0 ? '' : module.weights.tp.toString());
+
+  const handleBlurNumber = (text: string, setter: (v: string) => void, callback: (v: number) => void, min = 0, max = Number.POSITIVE_INFINITY) => {
+    if (text === '') {
+      callback(0);
+      setter('');
+      return;
+    }
+    // Accept locale decimal separators
+    const normalized = text.replace(',', '.');
+    const parsed = parseFloat(normalized);
+    if (!isNaN(parsed)) {
+      const clamped = Math.max(min, Math.min(max, parsed));
+      callback(clamped);
+      setter(clamped.toString());
+    } else {
+      // keep what user typed but don't update model
+      setter(text);
+    }
+  };
+
   return(
     <View className='flex-col p-4 rounded-xl' style={{borderWidth: 1, borderColor: "rgba(0,0,0,0.1)", backgroundColor: "rgba(100,100,100,0.1)"}}>
       <View className="flex-row items-center justify-between gap-4">
@@ -146,8 +171,15 @@ const AdvancedModule = ({ module, onUpdate, onDelete }: AdvancedModuleProps) => 
           </ThemedText>
 
           <TextInput
-            value={module.coeff.toString()}
-            onChangeText={(text) => onUpdate({ coeff: parseFloat(text) || 0 })}
+            value={coeffText}
+            onChangeText={(text) => {
+              setCoeffText(text);
+              const normalized = text.replace(',', '.');
+              if (normalized === '' || normalized === '.' || normalized.endsWith('.')) return;
+              const parsed = parseFloat(normalized);
+              if (!isNaN(parsed)) onUpdate({ coeff: parsed });
+            }}
+            onBlur={() => handleBlurNumber(coeffText, setCoeffText, (v) => onUpdate({ coeff: v }), 0)}
             keyboardType="numeric"
             placeholder="0"
             className="text-foreground dark:text-foreground-dark text-center border-inp"
@@ -161,8 +193,15 @@ const AdvancedModule = ({ module, onUpdate, onDelete }: AdvancedModuleProps) => 
           </ThemedText>
 
           <TextInput
-            value={module.credit.toString()}
-            onChangeText={(text) => onUpdate({ credit: parseFloat(text) || 0 })}
+            value={creditText}
+            onChangeText={(text) => {
+              setCreditText(text);
+              const normalized = text.replace(',', '.');
+              if (normalized === '' || normalized === '.' || normalized.endsWith('.')) return;
+              const parsed = parseFloat(normalized);
+              if (!isNaN(parsed)) onUpdate({ credit: parsed });
+            }}
+            onBlur={() => handleBlurNumber(creditText, setCreditText, (v) => onUpdate({ credit: v }), 0)}
             keyboardType="numeric"
             placeholder="0"
             className="text-foreground dark:text-foreground-dark text-center border-inp"
@@ -200,8 +239,15 @@ const AdvancedModule = ({ module, onUpdate, onDelete }: AdvancedModuleProps) => 
           <View className='flex-col w-[20%]'>
             <ThemedText className='text-sm text-center'>{t('apps.exam')}</ThemedText>
             <TextInput
-              value={module.weights.exam.toString()}
-              onChangeText={(text) => onUpdate({ weights: { ...module.weights, exam: parseFloat(text) || 0 } })}
+              value={examText}
+              onChangeText={(text) => {
+                setExamText(text);
+                const normalized = text.replace(',', '.');
+                if (normalized === '' || normalized === '.' || normalized.endsWith('.')) return;
+                const parsed = parseFloat(normalized);
+                if (!isNaN(parsed)) onUpdate({ weights: { ...module.weights, exam: Math.max(0, Math.min(1, parsed)) } });
+              }}
+              onBlur={() => handleBlurNumber(examText, setExamText, (v) => onUpdate({ weights: { ...module.weights, exam: v } }), 0, 1)}
               keyboardType="numeric"
               placeholder="0"
               className="text-foreground dark:text-foreground-dark text-center border-inp"
@@ -212,8 +258,15 @@ const AdvancedModule = ({ module, onUpdate, onDelete }: AdvancedModuleProps) => 
           {module.hasTd && <View className='flex-col w-[20%]'>
             <ThemedText className='text-sm text-center'>{t('apps.td')}</ThemedText>
             <TextInput
-              value={module.weights.td.toString()}
-              onChangeText={(text) => onUpdate({ weights: { ...module.weights, td: parseFloat(text) || 0 } })}
+              value={tdText}
+              onChangeText={(text) => {
+                setTdText(text);
+                const normalized = text.replace(',', '.');
+                if (normalized === '' || normalized === '.' || normalized.endsWith('.')) return;
+                const parsed = parseFloat(normalized);
+                if (!isNaN(parsed)) onUpdate({ weights: { ...module.weights, td: Math.max(0, Math.min(1, parsed)) } });
+              }}
+              onBlur={() => handleBlurNumber(tdText, setTdText, (v) => onUpdate({ weights: { ...module.weights, td: v } }), 0, 1)}
               keyboardType="numeric"
               placeholder="0"
               className="text-foreground dark:text-foreground-dark text-center border-inp"
@@ -224,8 +277,15 @@ const AdvancedModule = ({ module, onUpdate, onDelete }: AdvancedModuleProps) => 
           {module.hasTp && <View className='flex-col w-[20%]'>
             <ThemedText className='text-sm text-center'>{t('apps.tp')}</ThemedText>
             <TextInput
-              value={module.weights.tp.toString()}
-              onChangeText={(text) => onUpdate({ weights: { ...module.weights, tp: parseFloat(text) || 0 } })}
+              value={tpText}
+              onChangeText={(text) => {
+                setTpText(text);
+                const normalized = text.replace(',', '.');
+                if (normalized === '' || normalized === '.' || normalized.endsWith('.')) return;
+                const parsed = parseFloat(normalized);
+                if (!isNaN(parsed)) onUpdate({ weights: { ...module.weights, tp: Math.max(0, Math.min(1, parsed)) } });
+              }}
+              onBlur={() => handleBlurNumber(tpText, setTpText, (v) => onUpdate({ weights: { ...module.weights, tp: v } }), 0, 1)}
               keyboardType="numeric"
               placeholder="0"
               className="text-foreground dark:text-foreground-dark text-center border-inp"

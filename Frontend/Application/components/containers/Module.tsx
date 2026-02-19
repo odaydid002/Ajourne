@@ -34,6 +34,33 @@ const Module = ({ module: initialModule, onChange, onDelete }: moduleProps) => {
       coeff: 0,
     }
   ));
+  
+  const [coeffText, setCoeffText] = useState(module.coeff === 0 ? '' : module.coeff.toString());
+
+  const handleCoeffChange = (text: string) => {
+    setCoeffText(text);
+    const normalized = text.replace(',', '.');
+    if (normalized === '' || normalized === '.' || normalized.endsWith('.')) return;
+    const parsed = parseFloat(normalized);
+    if (!isNaN(parsed)) {
+      updateModule({ coeff: parsed });
+    }
+  };
+
+  const handleCoeffBlur = () => {
+    if (coeffText === '') {
+      updateModule({ coeff: 0 });
+      setCoeffText('');
+      return;
+    }
+    const parsed = parseFloat(coeffText.replace(',', '.'));
+    if (!isNaN(parsed)) {
+      updateModule({ coeff: parsed });
+      setCoeffText(parsed.toString());
+    } else {
+      setCoeffText('');
+    }
+  };
 
   const updateModule = (updates: Partial<moduleStruct>) => {
     const updated = { ...module, ...updates };
@@ -67,11 +94,10 @@ const Module = ({ module: initialModule, onChange, onDelete }: moduleProps) => {
           </ThemedText>
 
           <TextInput
-            value={module.coeff.toString()==="0"?'':module.coeff.toString()}
+            value={coeffText}
             keyboardType="numeric"
-            onChangeText={(text) =>
-              updateModule({ coeff: Number(text) || 0 })
-            }
+            onChangeText={handleCoeffChange}
+            onBlur={handleCoeffBlur}
             placeholder="0"
             className="text-foreground dark:text-foreground-dark text-center border-inp"
             style={{ borderBottomWidth: 1 }}

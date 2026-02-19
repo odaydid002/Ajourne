@@ -55,7 +55,7 @@
     "offline": "Offline",
     "noData": "No data available",
     "info": "Information",
-    "back": "Back"
+    "optional": "Optional"
   },
 
   "mode": {
@@ -138,7 +138,9 @@
       "saveFailed": "Failed to save calculator",
       "saveError": "An error occurred while saving",
       "notFound": "Calculator not found",
-      "loadFailed": "Failed to load calculator"
+      "loadFailed": "Failed to load calculator",
+      "alreadyRegistered": "Email already registered. Try again later.",
+      "publisherBackendError": "Backend error. Please try again later."
     },
     "success": {
       "published": "Calculator published successfully!",
@@ -166,8 +168,13 @@
     "average": "Average",
     "unitAvg": "Unit Average",
     "failed": "Failed",
+    "overall": "Overall",
     "success": "Success",
-    "dette": "Success with credits"
+    "dette": "Success with credits",
+    "title": "Title",
+    "calculatorTitle": "Calculator Title",
+    "description": "Description",
+    "calculatorDescription": "Calculator Description"
   },
 
   "review": {

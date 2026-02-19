@@ -55,7 +55,8 @@
     "offline": "غير متصل",
     "noData": "لا توجد بيانات",
     "info": "معلومات",
-    "back": "العودة"
+    "back": "العودة",
+    "optional": "اختياري"
   },
   "mode": {
     "single": "حساب معدل فصل واحد فقط",
@@ -136,7 +137,9 @@
       "saveFailed": "فشل حفظ الحاسبة",
       "saveError": "حدث خطأ أثناء الحفظ",
       "notFound": "لم يتم العثور على الحاسبة",
-      "loadFailed": "فشل تحميل الحاسبة"
+      "loadFailed": "فشل تحميل الحاسبة",
+      "alreadyRegistered": "البريد الإلكتروني مسجل بالفعل. حاول مرة أخرى لاحقا.",
+      "publisherBackendError": "خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقا."
     },
     "success": {
       "published": "تم نشر الحاسبة بنجاح!",
@@ -162,10 +165,15 @@
     "addUnit": "إضافة وحدة",
     "total": "المجموع",
     "average": "المعدل",
+    "overall": "المعدل العام",
     "unitAvg": "معدل الوحدة",
     "failed": "راسب",
     "success": "ناجح",
-    "dette": "ناجح مع ديون"
+    "dette": "ناجح مع ديون",
+    "title": "العنوان",
+    "calculatorTitle": "عنوان الحاسبة",
+    "description": "الوصف",
+    "calculatorDescription": "وصف الحاسبة"
   },
 
   "settings": {

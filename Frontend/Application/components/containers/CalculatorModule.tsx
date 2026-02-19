@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ThemedText } from '../text/ThemedText'
 import { useTranslation } from 'react-i18next'
 import { useColorScheme } from 'nativewind'
@@ -55,12 +55,18 @@ const examWeights = {
   }
 }
 
-const updateAvg = (hasTd = false, hasTp= false, notes: notes): number =>{
-  if (!hasTd && !hasTp) return parseFloat((notes.exam * examWeights.t1.exam ).toFixed(2))
-  if (hasTd && !hasTp) return parseFloat((notes.exam * examWeights.t2.exam  + notes.td * examWeights.t2.td).toFixed(2))
-  if (!hasTd && hasTp) return parseFloat((notes.exam * examWeights.t3.exam  + notes.tp * examWeights.t3.tp).toFixed(2))
-  if (hasTd && hasTp) return parseFloat((notes.exam * examWeights.t4.exam + notes.td * examWeights.t4.td + notes.tp * examWeights.t4.tp).toFixed(2))
-  return 0
+const updateAvg = (hasTd = false, hasTp= false, notes: notes, weights?: {exam?:number, td?:number, tp?:number}): number =>{
+  // Prefer explicit weights when provided, otherwise fallback to defaults
+  const examW = (typeof weights?.exam === 'number') ? weights!.exam : (!hasTd && !hasTp ? examWeights.t1.exam : (hasTd && !hasTp ? examWeights.t2.exam : ( !hasTd && hasTp ? examWeights.t3.exam : examWeights.t4.exam)));
+  const tdW = (typeof weights?.td === 'number') ? weights!.td : (hasTd && !hasTp ? examWeights.t2.td : (hasTd && hasTp ? examWeights.t4.td : 0));
+  const tpW = (typeof weights?.tp === 'number') ? weights!.tp : (!hasTd && hasTp ? examWeights.t3.tp : (hasTd && hasTp ? examWeights.t4.tp : 0));
+
+  let total = 0;
+  total += notes.exam * examW;
+  if (hasTd) total += notes.td * tdW;
+  if (hasTp) total += notes.tp * tpW;
+
+  return parseFloat(total.toFixed(2));
 }
 
 const CalculatorModule = ({module, onChange}: moduleProps) => {
@@ -73,6 +79,12 @@ const CalculatorModule = ({module, onChange}: moduleProps) => {
   const [examError, setExamError] = useState(false)
   const [tdError, setTdError] = useState(false)
   const [tpError, setTpError] = useState(false)
+
+  // Keep local state in sync with prop updates so switching semesters doesn't lose edits
+  useEffect(() => {
+    setNotes(module?.notes ?? { exam: 0, td: 0, tp: 0 });
+    setAvg(module?.avg ?? 0);
+  }, [module?.notes, module?.avg]);
 
   return (
     <View
@@ -107,7 +119,7 @@ const CalculatorModule = ({module, onChange}: moduleProps) => {
               setExamError(val < 0 || val > 20)
               const newNotes = { ...notes, exam: clamped }
               setNotes(newNotes)
-              const newAvg = updateAvg(!!module?.hasTd, !!module?.hasTp, newNotes)
+              const newAvg = updateAvg(!!module?.hasTd, !!module?.hasTp, newNotes, module?.weights)
               setAvg(newAvg)
               onChange?.({ ...(module as any), notes: newNotes, avg: newAvg })
             }}
@@ -130,7 +142,7 @@ const CalculatorModule = ({module, onChange}: moduleProps) => {
               setTdError(val < 0 || val > 20)
               const newNotes = { ...notes, td: clamped }
               setNotes(newNotes)
-              const newAvg = updateAvg(!!module?.hasTd, !!module?.hasTp, newNotes)
+              const newAvg = updateAvg(!!module?.hasTd, !!module?.hasTp, newNotes, module?.weights)
               setAvg(newAvg)
               onChange?.({ ...(module as any), notes: newNotes, avg: newAvg })
             }}
@@ -153,7 +165,7 @@ const CalculatorModule = ({module, onChange}: moduleProps) => {
               setTpError(val < 0 || val > 20)
               const newNotes = { ...notes, tp: clamped }
               setNotes(newNotes)
-              const newAvg = updateAvg(!!module?.hasTd, !!module?.hasTp, newNotes)
+              const newAvg = updateAvg(!!module?.hasTd, !!module?.hasTp, newNotes, module?.weights)
               setAvg(newAvg)
               onChange?.({ ...(module as any), notes: newNotes, avg: newAvg })
             }}

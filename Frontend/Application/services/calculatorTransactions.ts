@@ -3,6 +3,9 @@ import uuid from 'react-native-uuid';
 import { getDatabase } from '@/database';
 import { calculatorService } from './calculatorService';
 import { publisherService } from './publisherService';
+import { semesterService } from './semesterService';
+import { unitService } from './unitService';
+import { moduleService } from './moduleService';
 import i18n from '@/i18n';
 
 export interface CalculatorData {
@@ -50,6 +53,82 @@ const transformModulesWeights = (modules: any[]) => {
   return modules.map(transformModuleWeights);
 };
 
+// Normalize module object shape to UI expected keys (camelCase, weights object)
+const normalizeModule = (m: any) => {
+  if (!m || typeof m !== 'object') return m;
+  const mod = { ...m } as any;
+  // hasTd / hasTp
+  if (mod.has_td !== undefined) { mod.hasTd = !!mod.has_td; }
+  if (mod.hasTp === undefined && mod.hasTp === undefined && mod.hasTd === undefined) {
+    // try camelCase keys
+    if (mod.hasTd === undefined && mod.has_td === undefined) mod.hasTd = !!mod.hasTd;
+  }
+  if (mod.has_tp !== undefined) { mod.hasTp = !!mod.has_tp; }
+
+  // coeff / credit
+  if (mod.coeff === undefined && mod.coef !== undefined) mod.coeff = mod.coef;
+
+  // weights normalization: weight_exam, weight_td, weight_tp -> weights: { exam, td, tp }
+  let exam = mod.weight_exam ?? mod.weightExam ?? mod.weights?.exam ?? mod.exam_weight ?? mod.weight?.exam ?? mod.weight;
+  let td = mod.weight_td ?? mod.weightTd ?? mod.weights?.td ?? mod.td_weight;
+  let tp = mod.weight_tp ?? mod.weightTp ?? mod.weights?.tp ?? mod.tp_weight;
+
+  // Normalize numeric values: accept numbers or numeric strings (e.g. "0.50" or "50")
+  const normalizeVal = (v: any) => {
+    if (v === null || v === undefined) return undefined;
+    // coerce numeric strings to numbers
+    let num: number | undefined;
+    if (typeof v === 'number') num = v;
+    else if (typeof v === 'string' && v.trim() !== '' && !Number.isNaN(Number(v))) num = Number(v);
+    if (typeof num === 'number') {
+      return num > 1 ? num / 100 : num;
+    }
+    return undefined;
+  };
+
+  // Prefer explicit DB columns (weight_exam/weight_td/weight_tp) when present
+  const examFromCols = normalizeVal(mod.weight_exam ?? mod.weightExam ?? mod.exam_weight ?? mod.weight?.exam ?? mod.weight);
+  const tdFromCols = normalizeVal(mod.weight_td ?? mod.weightTd ?? mod.td_weight);
+  const tpFromCols = normalizeVal(mod.weight_tp ?? mod.weightTp ?? mod.tp_weight);
+
+  exam = examFromCols ?? normalizeVal(exam) ?? normalizeVal(mod.weights?.exam) ?? undefined;
+  td = tdFromCols ?? normalizeVal(td) ?? normalizeVal(mod.weights?.td) ?? undefined;
+  tp = tpFromCols ?? normalizeVal(tp) ?? normalizeVal(mod.weights?.tp) ?? undefined;
+
+  // Debug final normalized weights
+  try {
+  } catch (e) {}
+
+  // Provide sensible defaults when weights are missing
+  if (!mod.hasTd && !mod.hasTp) {
+    exam = (typeof exam === 'number') ? exam : 1;
+    td = 0;
+    tp = 0;
+  } else if (mod.hasTd && !mod.hasTp) {
+    exam = (typeof exam === 'number') ? exam : 0.6;
+    td = (typeof td === 'number') ? td : 0.4;
+    tp = 0;
+  } else if (!mod.hasTd && mod.hasTp) {
+    exam = (typeof exam === 'number') ? exam : 0.6;
+    td = 0;
+    tp = (typeof tp === 'number') ? tp : 0.4;
+  } else {
+    // has both
+    exam = (typeof exam === 'number') ? exam : 0.6;
+    td = (typeof td === 'number') ? td : 0.2;
+    tp = (typeof tp === 'number') ? tp : 0.2;
+  }
+
+  // Ensure sane fallback to avoid NaNs
+  exam = typeof exam === 'number' ? exam : 0;
+  td = typeof td === 'number' ? td : 0;
+  tp = typeof tp === 'number' ? tp : 0;
+
+  mod.weights = { exam, td, tp };
+
+  return mod;
+}
+
 /**
  * Save calculator to local SQLite database
  * Inserts calculator, semesters, modules/units structure
@@ -82,7 +161,6 @@ export const saveCalculatorLocally = async (
     const now = new Date().toISOString();
 
     // Insert calculator
-    console.log('Inserting calculator:', calculatorData.id);
     
     if (!database || !database.runAsync) {
       console.error('Database not properly initialized: database.runAsync is not available');
@@ -110,7 +188,6 @@ export const saveCalculatorLocally = async (
 
     // Insert semesters based on mode
     const semesters = calculatorData.mode === 'dual' ? ['s1', 's2'] : ['s1'];
-    console.log(`Inserting ${semesters.length} semesters for calculator:`, calculatorData.id);
     
     for (const sem of semesters) {
       const semesterId = uuid.v4().toString();
@@ -222,20 +299,16 @@ export const publishCalculator = async (
       // Generate new publisher ID if not exists
       publisherId = uuid.v4().toString();
       await AsyncStorage.setItem('publisher-id', publisherId);
-      console.log('New publisher ID generated:', publisherId);
     }
 
     // Try to get or register publisher on backend
     try {
-      console.log('Checking if publisher exists on backend...');
       const existingPublisher = await publisherService.getPublisher(publisherId);
-      console.log('Publisher already exists:', existingPublisher.id);
     } catch (checkError: any) {
       // Publisher doesn't exist on backend, try to register it
       const errorMsg = checkError?.toString?.() || '';
       
       if (errorMsg.includes('404') || errorMsg.includes('not found')) {
-        console.log('Publisher not found on backend. Creating new publisher...');
         try {
           // Use a valid email format with timestamp to ensure uniqueness
           const timestamp = Date.now();
@@ -251,7 +324,6 @@ export const publishCalculator = async (
           
           publisherId = newPublisher.id;
           await AsyncStorage.setItem('publisher-id', publisherId);
-          console.log('New publisher registered successfully:', publisherId);
         } catch (registerError: any) {
           console.error('Failed to register publisher:', registerError);
           const regErrorMsg = registerError?.toString?.() || '';
@@ -268,8 +340,8 @@ export const publishCalculator = async (
             success: false,
             message: `Failed to register as a publisher. ${
               regErrorMsg.includes('409') 
-                ? 'Email already registered. Try again later.'
-                : 'Backend error. Please try again later.'
+                ? i18n.t('calculators.errors.alreadyRegistered')
+                : i18n.t('calculators.errors.publisherBackendError')
             }`,
           };
         }
@@ -300,8 +372,6 @@ export const publishCalculator = async (
       modules: transformedData.type === 'simple' ? transformedData.modules : [],
       units: transformedData.type === 'advanced' ? transformedData.units : [],
     };
-
-    console.log('Publishing calculator with publisherId:', publisherId);
 
     // Call API to create calculator
     const response = await calculatorService.createCalculatorAllInOne(
@@ -357,38 +427,171 @@ export const getCalculatorDetail = async (
   isOnline: boolean;
 } | null> => {
   try {
-    // Try to get from API first (online mode)
+    // Try API first (online mode)
     try {
       const calculator = await calculatorService.getCalculator(calculatorId);
       if (calculator && calculator.id) {
-        // Get semesters and modules from API
-        // You may need to create additional API endpoints for this
-        // For now, we'll fetch from local cache
-        const localData = await getCalculatorDetailLocally(calculatorId);
-        if (localData) {
+        // If API returns full structure (semesters/modules/units), use it
+        if (calculator.semesters || calculator.units || calculator.modules) {
           return {
-            calculator: { ...calculator, ...localData.calculator },
-            semesters: localData.semesters,
+            calculator,
+            semesters: calculator.semesters || [],
             isOnline: true,
           };
         }
+
+        // Otherwise try to enrich with structure from API (semesters -> units -> modules)
+        try {
+          const semestersRes = await semesterService.getSemestersByCalculator(calculatorId);
+          const semesters = Array.isArray(semestersRes)
+            ? semestersRes
+            : Array.isArray(semestersRes?.data)
+              ? semestersRes.data
+              : Array.isArray(semestersRes?.semesters)
+                ? semestersRes.semesters
+                : [];
+          const enrichedSemesters = await Promise.all(
+            semesters.map(async (sem: any) => {
+              // Try to fetch units for this semester
+                try {
+                const unitsRes = await unitService.getUnitsBySemester(sem.id);
+                const units = Array.isArray(unitsRes)
+                  ? unitsRes
+                  : Array.isArray(unitsRes?.data)
+                    ? unitsRes.data
+                    : Array.isArray(unitsRes?.units)
+                      ? unitsRes.units
+                      : [];
+                if (units && units.length > 0) {
+                  const enrichedUnits = await Promise.all(
+                    units.map(async (unit: any) => {
+                        try {
+                        const modsRes = await moduleService.getModulesByUnit(unit.id);
+                        const mods = Array.isArray(modsRes)
+                          ? modsRes
+                          : Array.isArray(modsRes?.data)
+                            ? modsRes.data
+                            : Array.isArray(modsRes?.modules)
+                              ? modsRes.modules
+                              : [];
+                        const normalized = mods.map(normalizeModule);
+                        return { ...unit, modules: normalized };
+                      } catch (merr) {
+                        console.error('[calculatorTransactions] failed to fetch modules for unit', unit.id, merr);
+                        return { ...unit, modules: [] };
+                      }
+                    })
+                  );
+                  return { ...sem, units: enrichedUnits, modules: [] };
+                }
+              } catch (uerr) {
+                console.error('[calculatorTransactions] failed to fetch units for semester', sem.id, uerr);
+              }
+
+              // No units -> fetch modules directly for semester
+              try {
+                const modsRes = await moduleService.getModulesBySemester(sem.id);
+                const mods = Array.isArray(modsRes)
+                  ? modsRes
+                  : Array.isArray(modsRes?.data)
+                    ? modsRes.data
+                    : Array.isArray(modsRes?.modules)
+                      ? modsRes.modules
+                      : [];
+                const normalized = mods.map(normalizeModule);
+                return { ...sem, units: [], modules: normalized };
+              } catch (merr) {
+                console.error('[calculatorTransactions] failed to fetch modules for semester', sem.id, merr);
+                return { ...sem, units: [], modules: [] };
+              }
+            })
+          );
+
+          if (enrichedSemesters && enrichedSemesters.length > 0) {
+            return {
+              calculator,
+              semesters: enrichedSemesters,
+              isOnline: true,
+            };
+          }
+        } catch (apiStructErr) {
+          console.error('[calculatorTransactions] API structure enrichment failed:', apiStructErr);
+        }
+
+        // If no enrichment available, prefer local DB enrichment (use DB weights/structure when present)
+        try {
+          const local = await getCalculatorDetailLocally(calculatorId, deviceId);
+          if (local && local.semesters && local.semesters.length > 0) {
+            // normalize DB modules
+            const normalizedSemesters = await Promise.all(
+              local.semesters.map(async (sem: any) => {
+                const semCopy = { ...sem } as any;
+                if (Array.isArray(semCopy.units) && semCopy.units.length > 0) {
+                  semCopy.units = semCopy.units.map((u: any) => ({
+                    ...u,
+                    modules: Array.isArray(u.modules) ? u.modules.map(normalizeModule) : [],
+                  }));
+                }
+                if (Array.isArray(semCopy.modules) && semCopy.modules.length > 0) {
+                  semCopy.modules = semCopy.modules.map(normalizeModule);
+                }
+                return semCopy;
+              })
+            );
+
+            return {
+              calculator: local.calculator,
+              semesters: normalizedSemesters,
+              isOnline: false,
+            };
+          }
+        } catch (localErr) {
+          console.error('[calculatorTransactions] local enrichment failed:', localErr);
+        }
+
+        // If no local data, still return API calculator basic info
+        return {
+          calculator,
+          semesters: [],
+          isOnline: true,
+        };
       }
+
+      // Not found on API -> try local DB
+      try {
+        const local = await getCalculatorDetailLocally(calculatorId, deviceId);
+        if (local) {
+          const normalizedSemesters = await Promise.all(
+            local.semesters.map(async (sem: any) => {
+              const semCopy = { ...sem } as any;
+              if (Array.isArray(semCopy.units) && semCopy.units.length > 0) {
+                semCopy.units = semCopy.units.map((u: any) => ({
+                  ...u,
+                  modules: Array.isArray(u.modules) ? u.modules.map(normalizeModule) : [],
+                }));
+              }
+              if (Array.isArray(semCopy.modules) && semCopy.modules.length > 0) {
+                semCopy.modules = semCopy.modules.map(normalizeModule);
+              }
+              return semCopy;
+            })
+          );
+
+          return {
+            calculator: local.calculator,
+            semesters: normalizedSemesters,
+            isOnline: false,
+          };
+        }
+      } catch (localErr) {
+        console.error('[calculatorTransactions] local fallback failed:', localErr);
+      }
+
+      return null;
     } catch (apiError) {
-      console.log('Online fetch failed, trying local database...', apiError);
+      console.error('[calculatorTransactions] API fetch failed:', apiError);
+      return null;
     }
-
-    // Fallback to local SQLite database (offline mode)
-    const localData = await getCalculatorDetailLocally(calculatorId, deviceId);
-    if (localData) {
-      return {
-        calculator: localData.calculator,
-        semesters: localData.semesters,
-        isOnline: false,
-      };
-    }
-
-    // Not found anywhere
-    return null;
   } catch (error: any) {
     console.error('Error fetching calculator detail:', error);
     return null;
@@ -419,7 +622,6 @@ const getCalculatorDetailLocally = async (
     );
 
     if (!calculatorResult) {
-      console.log('Calculator not found:', calculatorId);
       return null;
     }
 

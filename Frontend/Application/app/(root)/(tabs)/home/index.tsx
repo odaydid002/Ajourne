@@ -168,7 +168,7 @@ const Home = () => {
               contentContainerClassName='px-4 gap-4 items-center'
               className='mt-4 flex-row w-full max-w-[100%] overflow-visible'>
               {suggested.map((item, index) => (
-                <TouchableOpacity key={item.id} activeOpacity={0.8} onPress={() => {}}>
+                <TouchableOpacity key={item.id} activeOpacity={0.8} onPress={() => {router.push('/calculators/6364a7e6-e4e5-4363-86e1-9b546511b7c3')}}>
                   <Suggested {...item} count={index}/>
                 </TouchableOpacity>
               ))}

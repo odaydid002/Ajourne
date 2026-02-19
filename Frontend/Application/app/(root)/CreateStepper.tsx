@@ -513,7 +513,7 @@ const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, s
         <View className='flex-1 flex-col p-4'>
           {!showSuccess ? (
             <>
-              <Images.finish />
+              
               
               <ThemedText className='text-sm font-Poppins-Medium mt-4 mb-2'>{t('apps.title')}</ThemedText>
               <TextInput
@@ -549,7 +549,7 @@ const Step4 = ({modules, units, mode, type, setModules, setUnits, finishModal, s
                 }}
                 placeholderTextColor={colorScheme === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.5)"}
               />
-              
+              <Images.finish />
               <ButtonPrimary 
                 text={isPublishing ? i18n.t('control.publishing') || 'Publishing...' : i18n.t('control.publish')} 
                 h='h-14' 
