@@ -59,7 +59,7 @@ exports.getPublisher = async (req, res) => {
     const publisher = await PublisherModel.getById(id);
 
     if (!publisher) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: false,
         error: 'Publisher not found'
       });
