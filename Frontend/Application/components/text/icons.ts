@@ -98,6 +98,11 @@ import CreateSimpleIcon from "@/assets/icons/simple.svg";
 import CreateAdvancedIcon from "@/assets/icons/advanced.svg";
 import AddUnitPrimary from "@/assets/icons/dark/add_unit_primary.svg";
 import SavePrimary from "@/assets/icons/save_primary.svg";
+import NotPub from "@/assets/icons/notpub.svg";
+import Pub from "@/assets/icons/pub.svg";
+import Verif from "@/assets/icons/verif.svg";
+import NotVerif from "@/assets/icons/notverif.svg";
+import Google from "@/assets/icons/google.svg";
 
 export default {
     CreateSimpleIcon,
@@ -199,5 +204,10 @@ export default {
     TrashFillDarkIcon,
     TrashLightDarkIcon,
     UserDarkIcon,
-    XmarkDarkIcon
+    XmarkDarkIcon,
+    Pub,
+    NotPub,
+    NotVerif,
+    Verif,
+    Google
 }

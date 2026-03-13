@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Ajourne",
-    "slug": "Ajourne",
+    "slug": "ajourne",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/iconbg.png",
@@ -9,13 +9,15 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.odaydev.ajourne"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/images/iconbg.png"
       },
+      "package": "com.odaydev.ajourne",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -29,7 +31,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./asstes/images/splash.png",
+          "image": "./assets/images/splash.png",
           "resizeMode": "cover",
           "enableFullScreenImage_legacy": true
         }
@@ -48,11 +50,18 @@
       ],
       "expo-localization",
       "react-native-localize",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "dc8d6925-c054-4e9d-a2a9-36e3e7c16e68"
+      }
     }
   }
 }

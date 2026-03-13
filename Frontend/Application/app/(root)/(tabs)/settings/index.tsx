@@ -11,7 +11,14 @@ import { useColorScheme } from 'nativewind'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { I18nManager, NativeModules, ScrollView, Text, TouchableOpacity, View, Switch } from 'react-native'
+import { ActivityIndicator } from 'react-native-paper'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 const Settings = () => {
   const { t } = useTranslation();
@@ -25,6 +32,10 @@ const Settings = () => {
   const [userUniv, setUserUniv] = useState('');
   const [userSpec, setUserSpec] = useState('');
   const [userLang, setUserLang] = useState('');
+  const [pubID, setPubID] = useState(null);
+  const [pubIDActive, setPubIDActive] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -56,6 +67,18 @@ const Settings = () => {
         showsVerticalScrollIndicator={false}
         className="flex-1 flex-col overflow-visible"
       >
+        <TouchableOpacity onPress={() => setPubIDActive(true)} activeOpacity={0.8} className='my-3 px-6 py-6 bg-black rounded-xl w-full flex-row items-center justify-between'>
+          <View className='flex-col'>
+            <Text className='text-lg text-white'>{t('settings.publisherProfile')}</Text>
+            {pubID && 
+                <Text className='text-sm text-white opacity-40'>{t('settings.publisherID')}: {pubID}</Text>
+            }
+            {!pubID && 
+                <Text className='text-sm text-white opacity-40'>{t('settings.notPublisher')}</Text>
+            }
+          </View>
+          {!pubID? <Icons.NotPub /> : <Icons.Pub />}
+        </TouchableOpacity>
         <SettingOption className='my-4 px-6 py-4'>
           <View className='flex-cox flex-1 gap-4'>
             <TouchableOpacity
@@ -176,6 +199,33 @@ const Settings = () => {
           </View>
         </View>
       </CustomModal>
+      
+       <CustomModal title={t("settings.publisherID")} visible={pubIDActive} toggle={() => setPubIDActive(false)}>
+        <View className='flex-1 flex-col p-4 justify-center items-center'>
+          {pubID && <>
+            <Icons.Verif />
+          </>}
+          {!pubID && <>
+            <Icons.NotVerif />
+            <ThemedText className='my-4 text-lg'>{t("settings.notVerified")}</ThemedText>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {}}
+              disabled = {loginLoading}
+              className={`py-3 mt-4 flex-row items-center justify-center gap-4 w-full h-15 bg-black rounded-xl`}
+              style={{opacity: loginLoading?0.7:1}}
+            >
+              {!loginLoading? 
+                <>
+                  <Icons.Google />
+                  <Text className='text-white text-lg'>{t("settings.signIn")}</Text>
+                </>:
+                <ActivityIndicator color='white'/>
+              }
+            </TouchableOpacity>
+          </>}
+        </View>
+       </CustomModal>
 
     </SafeAreaView>
   )

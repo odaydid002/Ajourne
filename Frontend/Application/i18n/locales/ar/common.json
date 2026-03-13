@@ -55,7 +55,6 @@
     "offline": "غير متصل",
     "noData": "لا توجد بيانات",
     "info": "معلومات",
-    "back": "العودة",
     "optional": "اختياري"
   },
   "mode": {
@@ -192,7 +191,12 @@
     "facebook": "فيسبوك",
     "instagram": "انستاغرام",
     "linkedin": "لينكد ان",
+    "publisherProfile": "ملف الناشر",
+    "notPublisher": "فعّل حسابك للاستفادة من خدمة النشر.",
+    "signIn": "تسجيل الدخول",
     "personalInfo" : "المعلومات الشخصية",
+    "publisherID" : "معرف الناشر",
+    "notVerified": "حسابك غير موثق!",
     "academicInfo" : "المعلومات الأكاديمية",
     "mailBody": "أرغب في الاتصال بك بخصوص...",
     "mailSubject": "تطبيق - Ajourne",

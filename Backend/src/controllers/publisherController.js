@@ -167,3 +167,27 @@ exports.verifyEmail = async (req, res) => {
     });
   }
 };
+
+exports.checkPublisherExists = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const publisher = await PublisherModel.getByEmail(email);
+
+    if (!publisher) {
+      return res.status(404).json({
+        success: false,
+        error: 'Publisher not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: publisher
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};

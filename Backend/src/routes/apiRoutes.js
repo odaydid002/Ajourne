@@ -22,6 +22,7 @@ router.get('/publishers', publisherController.getAllPublishers);
 router.get('/publishers/:id', publisherController.getPublisher);
 router.put('/publishers/:id', publisherController.updatePublisher);
 router.post('/publishers/:id/verify-email', publisherController.verifyEmail);
+router.get('/publishers/exists/:email', publisherController.checkPublisherExists);
 
 // ==================== CALCULATORS ====================
 router.post('/calculators', calculatorController.createCalculator);

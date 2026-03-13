@@ -12,6 +12,7 @@ import CalculatorModule from '@/components/containers/CalculatorModule'
 import CalculatorUnit from '@/components/containers/CalculatorUnit'
 import { ThemedText } from '@/components/text/ThemedText'
 import { useColorScheme } from 'nativewind'
+import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface Module {
   id: string;
@@ -346,6 +347,8 @@ const Calculator = () => {
     }
   }
 
+  const insets = useSafeAreaInsets();
+
   const totalCredits = getEarnedCredits()
 
   // Determine status based on average (Success if >= 10, Fail otherwise)
@@ -360,9 +363,9 @@ const Calculator = () => {
 
   return (
     <View className='flex-1 flex-col relative bg-background dark:bg-background-dark'>
-      <View className='absolute w-full h-[250px] overflow-hidden rounded-b-[60px] z-10'>
+      <View className={`absolute w-full h-[260px] overflow-hidden rounded-b-[60px] z-10`}>
         <LinearGradient
-          className='flex-1 pt-12 px-6 flex-col'
+          className='flex-1 pt-10 px-6 flex-col'
           colors={["#A3D289", "#93B77F"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -389,7 +392,7 @@ const Calculator = () => {
             </View>
           </View>
 
-          <View className='flex-col items-center mt-6'>
+          <View className='flex-col items-center mt-5'>
             <Text className='text-2xl font-semibold text-white text-center'>{t(`levels.${calculator.level}`)}</Text>
             <Text className='text-xl text-white opacity-90'>{t(`specialities.${calculator.speciality}`)}</Text>
           </View>
@@ -435,7 +438,7 @@ const Calculator = () => {
         </LinearGradient>
       </View>
 
-      <SafeAreaView className='flex-1' style={{paddingTop: hasTwoSemesters?250:0}}>
+      <SafeAreaView className='flex-1' style={{paddingTop: hasTwoSemesters?260:0}}>
         {hasTwoSemesters && (
           <View className='flex-col px-4 py-4 bg-background dark:bg-background-dark border-b border-gray-200 dark:border-gray-700'>
             <SemesterSlider setSem={(s: string) => setSelectedSem(s as 's1' | 's2')} />

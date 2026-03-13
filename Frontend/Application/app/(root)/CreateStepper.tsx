@@ -23,7 +23,6 @@ import uuid from 'react-native-uuid'
 import CalculatorModule from '@/components/containers/CalculatorModule'
 import CalculatorUnit from '@/components/containers/CalculatorUnit'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { calculatorService } from '@/services/calculatorService'
 import { saveCalculatorLocally, publishCalculator } from '@/services/calculatorTransactions'
 
 const { width } = Dimensions.get('window')
