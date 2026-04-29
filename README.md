@@ -142,66 +142,6 @@ npm start
 
 ---
 
-## 🔗 API Communication
-
-The frontend communicates with the backend using HTTP requests.
-
-Example:
-
-```js
-fetch("http://localhost:5000/api/endpoint")
-```
-
-Make sure to update the API base URL when testing on a real device.
-
----
-
-## 🚧 Future Improvements
-
-* 🔐 Authentication & authorization system
-* 📊 Dashboard with analytics
-* 🔔 Notifications system
-* 🌍 Deployment (cloud hosting)
-* 📱 Improved UI/UX
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!
-
-1. Fork the repository
-2. Create a new branch
-3. Commit your changes
-4. Open a Pull Request
-
----
-
-## 📄 License
-
-MIT License
-
----
-
-## 👨‍💻 Author
-
-**Oudai Oulhadj**
-
----
-
-## 💡 Notes
-
-This project demonstrates:
-
-* Full-stack development skills
-* Mobile app development with React Native
-* Backend API design
-* Database integration with PostgreSQL
-
----
-
-⭐ If you find this project useful, consider giving it a star!
-
 ## 📡 API Endpoints Documentation
 
 The backend exposes a REST API used by the React Native frontend to manage students, absences, and delays.
@@ -381,4 +321,53 @@ All errors follow this format:
 * Future versions may include authentication (JWT).
 
 ---
+
+
+---
+
+## 🚧 Future Improvements
+
+* 🔐 Authentication & authorization system
+* 📊 Dashboard with analytics
+* 🔔 Notifications system
+* 🌍 Deployment (cloud hosting)
+* 📱 Improved UI/UX
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repository
+2. Create a new branch
+3. Commit your changes
+4. Open a Pull Request
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+
+## 👨‍💻 Author
+
+**Oudai Oulhadj**
+
+---
+
+## 💡 Notes
+
+This project demonstrates:
+
+* Full-stack development skills
+* Mobile app development with React Native
+* Backend API design
+* Database integration with PostgreSQL
+
+---
+
+⭐ If you find this project useful, consider giving it a star!
 
