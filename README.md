@@ -201,3 +201,184 @@ This project demonstrates:
 ---
 
 ⭐ If you find this project useful, consider giving it a star!
+
+## 📡 API Endpoints Documentation
+
+The backend exposes a REST API used by the React Native frontend to manage students, absences, and delays.
+
+---
+
+## 🔐 Base URL
+
+```
+http://localhost:5000/api
+```
+
+---
+
+## 👤 Students
+
+### ➕ Create a student
+
+```
+POST /students
+```
+
+**Body:**
+
+```json
+{
+  "name": "John Doe",
+  "class": "L2 Informatique",
+  "email": "john@example.com"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Student created successfully",
+  "student": { ... }
+}
+```
+
+---
+
+### 📥 Get all students
+
+```
+GET /students
+```
+
+**Response:**
+
+```json
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "class": "L2 Informatique"
+  }
+]
+```
+
+---
+
+### 🔍 Get student by ID
+
+```
+GET /students/:id
+```
+
+---
+
+### ✏️ Update student
+
+```
+PUT /students/:id
+```
+
+**Body:**
+
+```json
+{
+  "name": "Updated Name",
+  "class": "Updated Class"
+}
+```
+
+---
+
+### ❌ Delete student
+
+```
+DELETE /students/:id
+```
+
+---
+
+## ⏱️ Absences
+
+### ➕ Add absence record
+
+```
+POST /absences
+```
+
+**Body:**
+
+```json
+{
+  "student_id": 1,
+  "date": "2026-04-29",
+  "reason": "Sick"
+}
+```
+
+---
+
+### 📥 Get all absences
+
+```
+GET /absences
+```
+
+---
+
+### 📥 Get absences by student
+
+```
+GET /absences/student/:id
+```
+
+---
+
+## ⏳ Delays
+
+### ➕ Add delay record
+
+```
+POST /delays
+```
+
+**Body:**
+
+```json
+{
+  "student_id": 1,
+  "date": "2026-04-29",
+  "minutes_late": 15
+}
+```
+
+---
+
+### 📥 Get all delays
+
+```
+GET /delays
+```
+
+---
+
+## ⚠️ Error Format
+
+All errors follow this format:
+
+```json
+{
+  "error": "Error message here"
+}
+```
+
+---
+
+## 🔒 Notes
+
+* All endpoints communicate with a PostgreSQL database.
+* Input validation should be handled in the backend.
+* Future versions may include authentication (JWT).
+
+---
+
